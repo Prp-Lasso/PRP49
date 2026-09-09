@@ -1,0 +1,46 @@
+# smoke test config: 8M model, tiny data, CPU
+model:
+  esm_model: ../esm2_8M_hf            # local copy for offline smoke test
+  lassoesm_model: ../esm2_8M_hf       # placeholder for smoke test (avoid 650M on debug MIG card)
+  h_dim: 128
+  n_heads: 2
+  k: 2
+  dropout: 0.3
+  ban_dropout: 0.3
+  freeze_esm: true
+  lassoesm_unfreeze: 0
+  dual_head: false
+
+data:
+  pairs_csv: ../mvp_cpu/pairs.csv
+  align_labels_json: ../mvp_cpu/contacts/contacts.json
+  max_len: 512
+  neg_pos_ratio: null
+  group_col: pdb
+
+train:
+  batch_size: 8
+  epochs: 2
+  lr: 0.001
+  weight_decay: 0.0001
+  patience: 5
+  seed: 42
+  num_seeds: 1
+  align_loss_weight: 0.1      # smoke: enable L_align path to verify wiring
+  align_loss_only_annotated: true
+  pu_weight: null
+  label_type: binary
+
+eval:
+  cv_folds: 3
+  cv_mode: stratified
+  ablation_csv: ../mvp_cpu/ablation_set.csv
+
+scan:
+  peptides_csv: null
+  targets_fasta: null
+  output: ../results/scan_matrix.csv
+
+paths:
+  output_dir: ./runs_smoke
+  checkpoint_dir: ./runs_smoke/checkpoints

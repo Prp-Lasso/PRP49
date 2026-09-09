@@ -1,0 +1,49 @@
+# PRP49 S1 warmup config: generic PPI pre-training on TUnA Bernett (L0)
+# Both encoders are ESM-2 35M and fully frozen; only BAN + heads train.
+# Purpose (docs/训练规划与检验方案.md 1.1): teach the fusion a generic
+# interaction representation before L1/L2 domain adaptation.
+model:
+  esm_model: ../esm2_35M_hf            # protein side (Bernett protA)
+  lassoesm_model: ../esm2_35M_hf       # peptide side (Bernett protB; NOT LassoESM for L0)
+  h_dim: 256
+  n_heads: 3
+  k: 2
+  dropout: 0.3
+  ban_dropout: 0.3
+  freeze_esm: true
+  lassoesm_unfreeze: 0
+  dual_head: false
+
+data:
+  pairs_csv: ../mvp_cpu/bernett_pairs_20k.csv  # 20k subset: fits in the 3h a100 slot
+  align_labels_json: null                   # no structural labels in Bernett
+  max_len: 1024
+  neg_pos_ratio: null
+  group_col: pdb
+
+train:
+  batch_size: 16
+  epochs: 12
+  lr: 0.001
+  weight_decay: 0.0001
+  patience: 6
+  seed: 42
+  num_seeds: 1
+  align_loss_weight: 0.0
+  align_loss_only_annotated: true
+  pu_weight: null
+  label_type: binary
+
+eval:
+  cv_folds: 5
+  cv_mode: stratified
+  ablation_csv: null
+
+scan:
+  peptides_csv: null
+  targets_fasta: null
+  output: ../results/scan_matrix.csv
+
+paths:
+  output_dir: ./runs_warmup
+  checkpoint_dir: ./runs_warmup/checkpoints

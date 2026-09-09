@@ -1,0 +1,27 @@
+# runtime / checkpoints
+runs*/
+__pycache__/
+*.pyc
+*.pt
+*.pth
+*.ckpt
+
+# large model weights (see README for download commands)
+LassoESM_hf/
+esm2_35M_hf/
+esm2_8M_hf/
+
+# large datasets (rebuild via data/build/)
+*.tar.gz
+*.zip
+*.npy
+*.npz
+*.pdb
+bernett_pairs.csv
+bernett_smoke.csv
+data_human_proteome.fasta
+TUnA/
+
+# ops scripts may contain credentials - never commit
+ops/
+*.log

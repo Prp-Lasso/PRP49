@@ -1,0 +1,41 @@
+pep_id,orig,seq,kind,pos,mut,note
+RES701-3-v2NQ,RES701-3,GQWHGTSPDWFFNYYW,conservative,2,N2Q,LP_434
+RES701-3-v6TS,RES701-3,GNWHGSSPDWFFNYYW,conservative,6,T6S,LP_434
+RES701-3-v7ST,RES701-3,GNWHGTTPDWFFNYYW,conservative,7,S7T,LP_434
+RES701-3-v11FY,RES701-3,GNWHGTSPDWYFNYYW,conservative,11,F11Y,LP_434
+RES701-1-v2NQ,RES701-1,GQWHGTAPDWFFNYYW,conservative,2,N2Q,biochem
+RES701-1-v6TS,RES701-1,GNWHGSAPDWFFNYYW,conservative,6,T6S,biochem
+RES701-1-v7AG,RES701-1,GNWHGTGPDWFFNYYW,conservative,7,A7G,biochem
+RES701-1-v11FY,RES701-1,GNWHGTAPDWYFNYYW,conservative,11,F11Y,biochem
+MccJ25-v3AG,MccJ25,GGGGHVPEYFVGIGTPISFYG,conservative,3,A3G,LP_471
+MccJ25-v6VI,MccJ25,GGAGHIPEYFVGIGTPISFYG,conservative,6,V6I,LP_471
+MccJ25-v6VL,MccJ25,GGAGHLPEYFVGIGTPISFYG,conservative,6,V6L,LP_471
+MccJ25-v9YF,MccJ25,GGAGHVPEFFVGIGTPISFYG,conservative,9,Y9F,LP_471
+Capistruin-v2TS,Capistruin,GSPGFQTPDARVISRFGFN,conservative,2,T2S,LP_105
+Capistruin-v5FY,Capistruin,GTPGYQTPDARVISRFGFN,conservative,5,F5Y,LP_105
+Capistruin-v6QN,Capistruin,GTPGFNTPDARVISRFGFN,conservative,6,Q6N,LP_105
+Capistruin-v7TS,Capistruin,GTPGFQSPDARVISRFGFN,conservative,7,T7S,LP_105
+Capi-var1-v2TS,Capi-var1,GSPGFQTPDNRVISRFGFN,conservative,2,T2S,LP_318
+Capi-var1-v5FY,Capi-var1,GTPGYQTPDNRVISRFGFN,conservative,5,F5Y,LP_318
+Capi-var1-v6QN,Capi-var1,GTPGFNTPDNRVISRFGFN,conservative,6,Q6N,LP_318
+Capi-var1-v7TS,Capi-var1,GTPGFQSPDNRVISRFGFN,conservative,7,T7S,LP_318
+Capi-var2-v2QN,Capi-var2,GNPGYQTIDFRVVTRLGGR,conservative,2,Q2N,LP_12391
+Capi-var2-v5YF,Capi-var2,GQPGFQTIDFRVVTRLGGR,conservative,5,Y5F,LP_12391
+Capi-var2-v6QN,Capi-var2,GQPGYNTIDFRVVTRLGGR,conservative,6,Q6N,LP_12391
+Capi-var2-v7TS,Capi-var2,GQPGYQSIDFRVVTRLGGR,conservative,7,T7S,LP_12391
+Anantin-v2FY,Anantin,GYIGWGKDIFGHYGG,conservative,2,F2Y,LP_366
+Anantin-v3IL,Anantin,GFLGWGKDIFGHYGG,conservative,3,I3L,LP_366
+Anantin-v3IV,Anantin,GFVGWGKDIFGHYGG,conservative,3,I3V,LP_366
+Anantin-v7KR,Anantin,GFIGWGRDIFGHYGG,conservative,7,K7R,LP_366
+Anantin-v2-v2FY,Anantin-v2,GYIGWGKDIFGHYSGGF,conservative,2,F2Y,LP_388
+Anantin-v2-v3IL,Anantin-v2,GFLGWGKDIFGHYSGGF,conservative,3,I3L,LP_388
+Anantin-v2-v3IV,Anantin-v2,GFVGWGKDIFGHYSGGF,conservative,3,I3V,LP_388
+Anantin-v2-v7KR,Anantin-v2,GFIGWGRDIFGHYSGGF,conservative,7,K7R,LP_388
+Lassomycin-v2LI,Lassomycin,GIRRLFADQLVGRNI,conservative,2,L2I,8IBO chain C (D8 acceptor)
+Lassomycin-v2LV,Lassomycin,GVRRLFADQLVGRNI,conservative,2,L2V,8IBO chain C (D8 acceptor)
+Lassomycin-v3RK,Lassomycin,GLKRLFADQLVGRNI,conservative,3,R3K,8IBO chain C (D8 acceptor)
+Lassomycin-v4RK,Lassomycin,GLRKLFADQLVGRNI,conservative,4,R4K,8IBO chain C (D8 acceptor)
+PB1m7-v2NQ,PB1m7,CQSNVLSWQTYSRWYC,conservative,2,N2Q,disulfide C1-C16
+PB1m7-v3ST,PB1m7,CNTNVLSWQTYSRWYC,conservative,3,S3T,disulfide C1-C16
+PB1m7-v4NQ,PB1m7,CNSQVLSWQTYSRWYC,conservative,4,N4Q,disulfide C1-C16
+PB1m7-v5VI,PB1m7,CNSNILSWQTYSRWYC,conservative,5,V5I,disulfide C1-C16

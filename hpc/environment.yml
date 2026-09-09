@@ -1,0 +1,18 @@
+name: prp49
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - pandas
+  - scikit-learn
+  - pyyaml
+  - tqdm
+  - pip:
+      - transformers==4.40.2
+      - huggingface_hub
+# PyTorch CUDA 版单独装（版本可控，走代理）：
+#   source activate prp49
+#   pip install torch==2.3.1 --index-url https://download.pytorch.org/whl/cu121

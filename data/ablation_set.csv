@@ -1,0 +1,21 @@
+pep_id,orig,seq,kind,pos,mut,note
+RES701-3-open,RES701-3,GNWHGTSPSWFFNYYW,ring-open,9,D9S,LP_434
+RES701-3-ctrl,RES701-3,GNWHGTSPDWFFNYFW,distal-control,15,Y15F,LP_434
+RES701-1-open,RES701-1,GNWHGTAPSWFFNYYW,ring-open,9,D9S,biochem
+RES701-1-ctrl,RES701-1,GNWHGTAPDWFFNYFW,distal-control,15,Y15F,biochem
+MccJ25-open,MccJ25,GGAGHVPSYFVGIGTPISFYG,ring-open,8,E8S,LP_471
+MccJ25-ctrl,MccJ25,GGAGHVPEYFVGIGTPISFFG,distal-control,20,Y20F,LP_471
+Capistruin-open,Capistruin,GTPGFQTPSARVISRFGFN,ring-open,9,D9S,LP_105
+Capistruin-ctrl,Capistruin,GTPGFQTPDARVISRFGFQ,distal-control,19,N19Q,LP_105
+Capi-var1-open,Capi-var1,GTPGFQTPSNRVISRFGFN,ring-open,9,D9S,LP_318
+Capi-var1-ctrl,Capi-var1,GTPGFQTPDNRVISRFGFQ,distal-control,19,N19Q,LP_318
+Capi-var2-open,Capi-var2,GQPGYQTISFRVVTRLGGR,ring-open,9,D9S,LP_12391
+Capi-var2-ctrl,Capi-var2,GQPGYQTIDFRVVTRLGGK,distal-control,19,R19K,LP_12391
+Anantin-open,Anantin,GFIGWGKSIFGHYGG,ring-open,8,D8S,LP_366
+Anantin-ctrl,Anantin,GFIGWGKDIFGHFGG,distal-control,13,Y13F,LP_366
+Anantin-v2-open,Anantin-v2,GFIGWGKSIFGHYSGGF,ring-open,8,D8S,LP_388
+Anantin-v2-ctrl,Anantin-v2,GFIGWGKDIFGHYSGGY,distal-control,17,F17Y,LP_388
+Lassomycin-open,Lassomycin,GLRRLFASQLVGRNI,ring-open,8,D8S,8IBO chain C (D8 acceptor)
+Lassomycin-ctrl,Lassomycin,GLRRLFADQLVGRNL,distal-control,15,I15L,8IBO chain C (D8 acceptor)
+PB1m7-open,PB1m7,SNSNVLSWQTYSRWYS,disulfide-break,"1,16","C1S,CnS",disulfide C1-C16
+PB1m7-ctrl,PB1m7,CNSNVLSWQTYSRWFC,distal-control,15,Y15F,disulfide C1-C16

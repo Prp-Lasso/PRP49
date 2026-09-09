@@ -1,0 +1,46 @@
+# PRP49 unified config (v2 refactor)
+model:
+  esm_model: ../esm2_35M_hf            # protein encoder (local copy; zero network on HPC)
+  lassoesm_model: ../LassoESM_hf            # peptide encoder (LassoESM 650M)
+  h_dim: 256
+  n_heads: 3
+  k: 2
+  dropout: 0.3
+  ban_dropout: 0.3
+  freeze_esm: false
+  lassoesm_unfreeze: 1        # unfreeze last N layers of peptide encoder (-1 = all, 0 = none)
+  dual_head: false            # add affinity regression head (requires 'energy' column)
+
+data:
+  pairs_csv: ../mvp_cpu/expanded_pairs.csv
+  align_labels_json: ../mvp_cpu/contacts/contacts.json   # interface contacts for L_align
+  max_len: 1024
+  neg_pos_ratio: null         # if set, downsample negatives to ratio*positives
+  group_col: pdb              # column used for grouped CV
+
+train:
+  batch_size: 16
+  epochs: 100
+  lr: 0.0002
+  weight_decay: 0.0001
+  patience: 20
+  seed: 42
+  num_seeds: 3
+  align_loss_weight: 0.1      # lambda for attention alignment loss
+  align_loss_only_annotated: true
+  pu_weight: null             # nnPU weight for unlabeled/soft-negative samples (null = off)
+  label_type: binary          # binary | energy
+
+eval:
+  cv_folds: 5
+  cv_mode: stratified         # stratified | grouped
+  ablation_csv: ../mvp_cpu/ablation_set.csv   # ring-open + distal controls
+
+scan:
+  peptides_csv: null          # list of lasso peptides to scan (set later)
+  targets_fasta: null         # list of human target proteins
+  output: ../results/scan_matrix.csv
+
+paths:
+  output_dir: ./runs
+  checkpoint_dir: ./runs/checkpoints

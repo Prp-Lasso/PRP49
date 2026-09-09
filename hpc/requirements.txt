@@ -1,0 +1,8 @@
+# PRP49 pip 依赖（torch 单独装 CUDA 版，见 README_DEPLOY.md Step 2）
+numpy
+pandas
+scikit-learn
+pyyaml
+tqdm
+transformers==4.40.2
+huggingface_hub
