@@ -1,8 +1,7 @@
 #!/bin/bash
 # ============================================================
-# PRP49 多 seed 并行：--array=1-4%4 → 4 个独立单卡作业（每作业 1 卡 16 核）
-# 每个 array task 生成独立 config（不同 seed / 输出目录），互不干扰
-# %4 = 最多同时跑 4 个（按账号 GPU 配额调整，配额不足会自动排队）
+# PRP49 multi-seed parallel: --array=1-4%4 = 4 independent 1-GPU jobs
+# Each task builds its own config (seed / output dir)
 # ============================================================
 #SBATCH --job-name=prp49_seed
 #SBATCH --partition=a100
@@ -14,20 +13,16 @@
 #SBATCH --array=1-4%4
 #SBATCH --output=%x-%A_%a.out
 #SBATCH --error=%x-%A_%a.err
-#SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=YOU@sjtu.edu.cn   # ← 改成你的邮箱
 
 set -e
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
 
-PRP49_ROOT=$HOME/prp49
-cd $PRP49_ROOT/PRP49
-
-mkdir -p $SCRATCH/prp49_runs
-ln -sfn $SCRATCH/prp49_runs ./runs
-
+source /usr/share/lmod/lmod/init/profile
 module load miniconda3/4.10.3
 source activate prp49
+
+PRP49_ROOT=$HOME/LassoPep
+cd $PRP49_ROOT/PRP49
 
 SEED=$((40 + SLURM_ARRAY_TASK_ID))
 CONF=config_seed${SEED}.yaml

@@ -1,8 +1,7 @@
 #!/bin/bash
 # ============================================================
-# PRP49 评估 + 环依赖消融：a100 单卡
-# 用法：sbatch job_eval.sh <checkpoint.pt>
-#   ckpt 来自训练作业：runs/checkpoints/fold{0..4}_best.pt（软链到 $SCRATCH）
+# PRP49 eval + ring ablation: a100, 1 GPU
+# usage: sbatch job_eval.sh <runs/checkpoints/fold0_best.pt>
 # ============================================================
 #SBATCH --job-name=prp49_eval
 #SBATCH --partition=a100
@@ -19,9 +18,10 @@ export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
 
 CKPT=${1:?usage: sbatch job_eval.sh <runs/checkpoints/fold0_best.pt>}
 
-cd $HOME/prp49/PRP49
+source /usr/share/lmod/lmod/init/profile
 module load miniconda3/4.10.3
 source activate prp49
 
+cd $HOME/LassoPep/PRP49
 python -m prp49.eval --config config.yaml --ckpt ${CKPT} --device cuda
 echo "EVAL_DONE"
