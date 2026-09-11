@@ -16,6 +16,20 @@ def binary_loss(logits, labels, pos_weight=1.0, sample_weight=None):
     return loss.mean()
 
 
+def ranking_loss(logits, labels, margin=0.5):
+    """Pairwise margin ranking (I2): positives must outscore negatives.
+
+    Aligns the training objective with the delivery metric (per-target ranking)
+    instead of pure global classification.
+    """
+    pos = logits[labels > 0.5]
+    neg = logits[labels <= 0.5]
+    if pos.numel() == 0 or neg.numel() == 0:
+        return None
+    diff = pos.unsqueeze(1) - neg.unsqueeze(0)      # (P, N)
+    return F.relu(margin - diff).mean()
+
+
 def alignment_loss(att_maps, contact_mats, pep_lens=None, prot_lens=None, mode='kl'):
     """Attention alignment loss (思路2): pull BAN attention toward true contacts.
 

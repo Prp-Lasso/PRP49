@@ -12,7 +12,7 @@ from sklearn.model_selection import StratifiedKFold, GroupKFold
 from .config import Config
 from .data import PairDataset, collate_fn, load_pairs, load_alignment_labels
 from .model import InteractionPredictor
-from .losses import binary_loss, alignment_loss
+from .losses import binary_loss, alignment_loss, ranking_loss
 
 
 def set_seed(seed):
@@ -47,6 +47,11 @@ def train_one(model, loader, optimizer, pos_weight, cfg, device):
         lab = batch['label'].to(device)
         logits, att, aff = model(ids1, m1, ids2, m2)
         loss = binary_loss(logits, lab, pos_weight=pos_weight)
+        rank_w = cfg.train.get('rank_loss_weight')
+        if rank_w:
+            rl = ranking_loss(logits, lab)
+            if rl is not None:
+                loss = loss + rank_w * rl
         if cfg.train.align_loss_weight:
             al = alignment_loss(att, batch.get('align'))
             if al is not None:
@@ -89,6 +94,23 @@ def evaluate_scores(scores, labels):
     return auc, ap
 
 
+def load_warmup_weights(model, ckpt_path, device):
+    """Transfer shape-matching tensors (BAN + heads) from a warmup checkpoint.
+
+    Warmup used dual ESM-2 35M; L2 uses 35M + LassoESM 650M, so encoder
+    weights differ in shape and are skipped - only the fusion/head weights
+    (the curriculum-learning payload) are transferred.
+    """
+    sd = torch.load(ckpt_path, map_location=device)
+    own = model.state_dict()
+    keep = {k: v for k, v in sd.items() if k in own and own[k].shape == v.shape}
+    own.update(keep)
+    model.load_state_dict(own)
+    print(f'init from {ckpt_path}: {len(keep)}/{len(own)} tensors transferred '
+          f'(e.g. {sorted(keep)[:3]})', flush=True)
+    return model
+
+
 def run_cv(cfg, device):
     """Cross-validated training per config; returns summary dict."""
     df = load_pairs(cfg.data.pairs_csv)
@@ -118,6 +140,16 @@ def run_cv(cfg, device):
     for fold, (tr, te) in enumerate(splitter):
         set_seed(cfg.train.seed)
         model = build_model(cfg).to(device)
+        if cfg.train.get('init_ckpt'):
+            ckpt = cfg.train.init_ckpt
+            if '{fold}' in ckpt:
+                cand = ckpt.replace('{fold}', str(fold))
+            else:
+                cand = ckpt
+            if os.path.exists(cand):
+                model = load_warmup_weights(model, cand, device)
+            else:
+                print(f'WARN init_ckpt not found: {cand}', flush=True)
         optimizer = torch.optim.Adam(
             [p for p in model.parameters() if p.requires_grad],
             lr=cfg.train.lr, weight_decay=cfg.train.weight_decay)
@@ -170,9 +202,18 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', default='config.yaml')
     parser.add_argument('--device', default='auto')
+    parser.add_argument('--init_ckpt', default=None,
+                        help='warmup checkpoint to initialise BAN/heads (curriculum S1->S2); '
+                             'may contain {fold}')
+    parser.add_argument('--out_suffix', default=None, help='override output_dir/checkpoint_dir suffix')
     args = parser.parse_args()
     cfg = Config.from_yaml(args.config)
     cfg._base_dir = os.path.dirname(os.path.abspath(args.config))
+    if args.init_ckpt:
+        cfg._d.setdefault('train', {})['init_ckpt'] = args.init_ckpt
+    if args.out_suffix:
+        cfg._d['paths']['output_dir'] = f'./runs_{args.out_suffix}'
+        cfg._d['paths']['checkpoint_dir'] = f'./runs_{args.out_suffix}/checkpoints'
     device = (torch.device('cuda' if torch.cuda.is_available() else 'cpu')
               if args.device == 'auto' else torch.device(args.device))
     print(f'device: {device}')

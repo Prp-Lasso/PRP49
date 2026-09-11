@@ -1,0 +1,14 @@
+id,seq,source
+RES-701-3,GNWHGTSPDWFFNYYW,lassopred LP_434 core; 9KDF ETB complex verified
+MccJ25,GGAGHVPEYFVGIGTPISFYG,lassopred LP_471 core; 6N60/6N61 RNAP
+Capistruin,GTPGFQTPDARVISRFGFN,lassopred LP_105 core; 6N61 RNAP
+Anantin,GFIGWGKDIFGHYGG,lassopred LP_366 core; NPR-A antagonist
+Siamycin-I,CLGVGSCNDFAGCGYAIVCFW,lassopred LP_37 core; 1RPB
+Chaxapeptin,GFGSKPLDSFGLNFF,lassopred LP_333 core; 2N5C
+Sphingopyxin-I,GIEPLGPVDEDQGEHYLFAGGITADD,lassopred LP_1300 core
+Lassomycin,GLRRLFANQLVGRRNI,8IBO chain (training-positive); lit GLRRLFADQLVGRRNI
+Ubonodin,GGDGSIAEYFNRPMHIHDWQIMDSGYYG,BMRB 30625 mature 28 aa
+Lariocidin,SKKSKPGDGKFGRGVKRG,"Nature 2025 640:1022, 18 aa; S1-D8 isopeptide"
+RES-701-1,GNWHGTAPDWFFNYYW,homolog of RES-701-3 (1 res diff); 9KDF-derived conformer
+PB1m7,CNSNVLSWQTYSRWYC,lasso-grafted peptide; 7VF3 experimental conformer
+Capi-var1,GTPGFQTPDNRVISRFGFN,capistruin variant (D8N); 6N61-derived conformer

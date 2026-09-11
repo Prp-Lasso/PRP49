@@ -1,6 +1,7 @@
 # PRP49 — AI 驱动的 Lasso 肽–人类蛋白质组互作（LPI）预测
 
 [![Stage Summary](https://img.shields.io/badge/docs-阶段总结-blue)](STAGE_SUMMARY.md)
+[![Results](https://img.shields.io/badge/results-实验结果汇总-orange)](RESULTS.md)
 [![Docs](https://img.shields.io/badge/docs-调研与规划-green)](docs/)
 
 上海交通大学 PRP 项目 49：基于蛋白质语言模型（pLM）的 **Lasso 肽 × 人类蛋白互作** 高通量预测 pipeline，
@@ -13,17 +14,30 @@
 > 以 **LassoESM（650M，lasso 专用语言模型）+ ESM-2 + BAN 双线性注意力** 为主模型，
 > 辅以 **注意力对齐损失（结构先验弱监督）** 与 **环依赖消融** 作为核心评估。
 
-详见 [STAGE_SUMMARY.md](STAGE_SUMMARY.md)（成果 / 不足 / 思路重点）与 `docs/` 下 14 份调研与规划文档。
+详见 [STAGE_SUMMARY.md](STAGE_SUMMARY.md)（成果 / 不足 / 思路重点）、[RESULTS.md](RESULTS.md)（首轮 HPC 实验结果汇总）与 `docs/` 下 15 份调研与规划文档。
+
+## 最新结果速览（详见 [RESULTS.md](RESULTS.md)）
+
+| 实验 | 结果 |
+|---|---|
+| 5 折 CV（35M × LassoESM 650M，随机初始化） | AUC **0.594**（8M MVP 基线 0.663 → 大模型反降） |
+| 5 折 CV（课程学习 + 排序损失 + 硬负样本） | AUC **0.8145 ± 0.017** ⚠️ 泄漏验证中（`config_improved_grouped.yaml`） |
+| 环依赖消融（验收项） | 89% 开环打分下降，配对 Wilcoxon **p = 0.0059** ✓ |
+| 对接（Vina，11 肽 × 10 靶 = 110 对） | 分数 −9~−16 kcal/mol；同源一致性 ✓；redocking 对照合理 |
+| 模型分 × 对接分融合（8 个已知对） | 平均排名 4.43 → **3.57**；前 20% 命中 4/8（未达 70% 验收） |
 
 ## 目录
 
 ```
 prp49/       重构五模块包：config / data / model(ESM-2×LassoESM+BAN) / losses / train / eval / scan / retrospective
-configs/     config.yaml（L2 微调）| config_warmup.yaml（S1 Bernett 预热）| *smoke.yaml（冒烟）
-scripts/     SJTU 交我算 SLURM 作业脚本（a100 / debuga100 / 评估 / 扫描 / 预热）
+configs/     config.yaml（L2 微调）| config_warmup.yaml（S1 预热）| config_improved*.yaml（改进/无泄漏验证）| *smoke.yaml
+scripts/     SJTU 交我算 SLURM 作业脚本（训练 / 扫描 / 评估 / 对接 array / 环境安装）
 hpc/         HPC 部署手册（六步）+ conda/pip 环境文件 + 打包脚本
-data/        训练/扫描/回溯/消融数据（CSV/FASTA，含 LassoPred 4749 条数据库）+ 构建脚本（build/）
-docs/        14 份文档：数据与正样本调研、GPU 估算、训练规划与验收方案、差距清单等
+hpc_ops/     paramiko 远程运维工具（登录探测、提交、轮询、结果回收）
+data/        训练/扫描/回溯/消融数据（含硬负样本）+ 构建脚本（build/）
+results/     对接矩阵（dock_matrix_full.csv）、扫描矩阵（scan_matrix*.csv）
+analysis/    对接-模型融合分析、硬负样本构造、对接输入准备等脚本
+docs/        15 份文档：调研、GPU 估算、训练规划与验收、差距清单、效果改进方案
 ```
 
 ## 关键资产（大文件另行获取，不入库）
