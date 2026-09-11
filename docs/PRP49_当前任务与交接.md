@@ -93,6 +93,11 @@ print(out); cli.close()
 
 **本机对应路径**：`D:\deepseek_harness\prp49\`（`mvp_cpu/`、`docking/`、`results/`、`scratch/`（分析脚本）、`affinity_data/`）
 
+**目标交付架构图**（archify 生成，可交互：主题切换 / 缩放 / 搜索 / 导览视图 / 导出）：
+- `diagrams/prp49-architecture.html` —— 交付产物（showcase 校验 9/9，四档视口零溢出）
+- `diagrams/prp49-architecture.json` —— 可编辑规格（13 节点 / 2 区域边界 / 13 连接 / 3 指标卡）
+- 三个导览视图：主预测路径 · 训练与监督信号 · 结构证据融合
+
 ---
 
 ## 5. 下一步待办（按优先级）

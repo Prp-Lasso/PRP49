@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "PRP49 目标交付架构",
+    "quality_profile": "showcase",
+    "output": "prp49-architecture.html",
+    "viewBox": [1420, 526],
+    "views": [
+      {
+        "id": "predict-path",
+        "label": "主预测路径",
+        "focus": ["peptides", "lassoid", "encoder", "ban", "heads"],
+        "note": "从肽序列经 Lasso 判定、双编码器与 BAN 注意力到分类与回归头。"
+      },
+      {
+        "id": "train-eval",
+        "label": "训练与监督信号",
+        "focus": ["targets", "affinity", "heads", "trainer", "eval"],
+        "note": "靶序列进入编码器；实验亲和力监督回归头；训练与评估在 A100 集群完成。"
+      },
+      {
+        "id": "structure-fusion",
+        "label": "结构证据融合",
+        "focus": ["propedia", "dock", "fusion", "deliverables"],
+        "note": "实验复合物经 AutoDock Vina 对接后与模型预测分融合排序，产出候选清单。"
+      }
+    ]
+  },
+  "layout": { "mode": "grid", "cols": 12, "cellW": 40, "cellH": 24 },
+  "components": [
+    { "id": "peptides", "type": "external", "label": "Lasso 肽序列", "sublabel": "13 条扫描肽 + 4749 条库", "tag": "LassoPred", "pos": [40, 170], "size": [155, 66] },
+    { "id": "lassoid", "type": "backend", "label": "Lasso 判定器", "sublabel": "匹配负样本 · F1 0.786", "pos": [260, 170], "size": [160, 66] },
+    { "id": "encoder", "type": "backend", "label": "双编码器", "sublabel": "LassoESM 650M + ESM-2 35M", "pos": [480, 170], "size": [180, 66] },
+    { "id": "ban", "type": "backend", "label": "BAN 双向注意力", "sublabel": "k=2 · L_align 结构对齐", "pos": [720, 170], "size": [165, 66] },
+    { "id": "heads", "type": "backend", "label": "分类头 + 回归头", "sublabel": "BCE + Huber 双目标", "pos": [940, 170], "size": [160, 66] },
+
+    { "id": "targets", "type": "external", "label": "人靶蛋白序列", "sublabel": "11 条靶链 · UniProt", "pos": [480, 60], "size": [180, 62] },
+    { "id": "affinity", "type": "external", "label": "实验亲和力数据", "sublabel": "4321 对 · Ki/Kd/IC50", "tag": "BindingDB + ChEMBL", "pos": [940, 60], "size": [160, 62] },
+
+    { "id": "trainer", "type": "cloud", "label": "A100 集群训练", "sublabel": "Slurm · grouped CV", "tag": "思源一号", "pos": [720, 290], "size": [165, 66] },
+    { "id": "eval", "type": "backend", "label": "评估套件", "sublabel": "CV · 环消融 · 回溯排名", "pos": [940, 290], "size": [160, 66] },
+
+    { "id": "propedia", "type": "external", "label": "Propedia 复合物", "sublabel": "2500 个实验结构", "pos": [40, 432], "size": [155, 62] },
+    { "id": "dock", "type": "cloud", "label": "AutoDock Vina 对接", "sublabel": "2499 对 · 刚性大环", "pos": [260, 432], "size": [160, 62] },
+    { "id": "fusion", "type": "backend", "label": "对接融合 re-ranking", "sublabel": "z(model) + w·z(−dock)", "pos": [940, 432], "size": [165, 66] },
+
+    { "id": "deliverables", "type": "database", "label": "交付产物", "sublabel": "扫描矩阵 + 候选清单", "tag": "高成药潜力环肽", "pos": [1190, 285], "size": [180, 118] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "序列预测与训练流水线", "wraps": ["peptides", "lassoid", "encoder", "ban", "heads", "trainer", "eval"] },
+    { "kind": "region", "label": "结构证据与融合排序", "wraps": ["propedia", "dock", "fusion"] }
+  ],
+  "connections": [
+    { "id": "peptides-to-lassoid", "from": "peptides", "to": "lassoid", "variant": "emphasis" },
+    { "id": "lassoid-to-encoder", "from": "lassoid", "to": "encoder" },
+    { "id": "targets-to-encoder", "from": "targets", "to": "encoder", "fromSide": "bottom", "toSide": "top" },
+    { "id": "encoder-to-ban", "from": "encoder", "to": "ban" },
+    { "id": "ban-to-heads", "from": "ban", "to": "heads" },
+    { "id": "affinity-to-heads", "from": "affinity", "to": "heads", "label": "回归监督", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "labelDy": 24 },
+    { "id": "heads-to-trainer", "from": "heads", "to": "trainer", "variant": "emphasis" },
+    { "id": "trainer-to-eval", "from": "trainer", "to": "eval" },
+    { "id": "propedia-to-dock", "from": "propedia", "to": "dock" },
+    { "id": "dock-to-fusion", "from": "dock", "to": "fusion" },
+    { "id": "eval-to-fusion", "from": "eval", "to": "fusion", "label": "预测分", "fromSide": "bottom", "toSide": "top" },
+    { "id": "fusion-to-deliverables", "from": "fusion", "to": "deliverables" },
+    { "id": "eval-to-deliverables", "from": "eval", "to": "deliverables", "label": "验收指标", "variant": "dashed" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "数据资产",
+      "items": [
+        "Lasso 肽 13 条扫描 + 4749 条库；人靶 11 条链",
+        "Propedia 2500 个实验复合物 · 实验亲和力 4321 对（564 靶）"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "模型与验证",
+      "items": [
+        "LassoESM 650M + ESM-2 35M 双编码器，BAN k=2，L_align 结构对齐",
+        "硬负样本 + grouped CV 阻断泄漏；分类 CV AUC 0.761；判定器 F1 0.786"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "交付产物",
+      "items": [
+        "13 肽 × 11 靶预测矩阵 + 对接融合排序（已知对平均排名 4.43 → 3.57）",
+        "高成药潜力拓扑异构环肽候选清单 · 41 个成药靶标扩展面板"
+      ]
+    }
+  ]
+}
