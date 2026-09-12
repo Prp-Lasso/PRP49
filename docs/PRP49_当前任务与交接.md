@@ -39,6 +39,7 @@
 | **62358463** | `prp49_grp` | **无泄漏验证**（按肽分组 CV）| 运行中，**fold0 AUC 0.812 / fold1 AUC 0.849**（还剩 3 折）|
 | **62359642** | `prp49_s2` | 跨拓扑迁移（Propedia 8346 对）| fold1 AUC 0.755 / AP 0.761，fold2 进行中 |
 | **62394451** | `prp49_regc` | **A+C 亲和力分类**（靶内 z-score + 分箱，2462 对）| 重提（首次因 BatchNorm batch=1 崩溃，已修 drop_last）|
+| **62394923** | `prp49_rank` | **成对排序（成药筛选导向）**：16,819 对同靶内偏好样本，5 折 grouped CV | 已提交排队；指标 = pair-acc / 逐靶 Spearman / NDCG@5 / EF@10% |
 | 已完成 | `prp49_lassoid2` | Lasso 判定器重训（匹配负样本）| Val F1 **0.7863**；`predict.py` 的 FASTA 注释行 bug 已修并上传 |
 | 已停止 | `prp49_reg` | 原亲和力回归（RMSE 6.86，判定不可行）| 已用 A+C 方案取代 |
 
@@ -88,6 +89,7 @@ print(out); cli.close()
 | `mvp_cpu/train_pairs_hard.csv` | 训练集（正 312 + 硬负样本），improved/grp 用 |
 | `mvp_cpu/affinity_pairs.csv` | 4321 对实验亲和力（Ki 1615 / Kd 545 / IC50 2161；564 靶；`energy` = pAffinity 3–12）|
 | **`mvp_cpu/affinity_cls_pairs.csv`** | **A+C 数据集：2462 对**（靶内 z-score 后 |z|>0.5 分箱，正 1235 / 负 1227；218 靶）|
+| **`mvp_cpu/affinity_pairs_rank.csv`** | **成对排序集：16,819 对**（同靶内肽对，ΔpAffinity ≥ 0.3；335 靶；列 prot_id/prot_seq/pep_a_seq/pep_b_seq/energy_a/energy_b/label）|
 | **`mvp_cpu/propedia_dock_pairs.csv`** | **对接增强集：3746 对**（Propedia 实验复合物正样本 1873，对接分 ≤ −12；打乱肽负样本 1873；698 受体；附 `dock_score` 列）|
 | `mvp_cpu/scan_peptides_ext.csv` | 13 条扫描肽 |
 | `mvp_cpu/scan_targets.fasta` | 11 条靶链 |
@@ -101,7 +103,18 @@ print(out); cli.close()
 | `PRP49/runs*/checkpoints/fold*_best.pt` | 各训练权重（650M 配置每个 2.75 GB）|
 | `results/scan_matrix_ext.csv` | 模型打分矩阵（13 肽）|
 
-**训练配置清单**（`PRP49/config_*.yaml`）：`config.yaml`（基线）、`config_warmup.yaml`（S1 课程预热）、`config_improved.yaml`（I1+I2+I5）、`config_improved_grouped.yaml`（无泄漏复评）、`config_s2.yaml`（Propedia 迁移）、**`config_reg_cls.yaml`（A+C 亲和力分类）**、**`config_s3.yaml`（对接增强迁移，含 dock_score）**
+**训练配置清单**（`PRP49/config_*.yaml`）：`config.yaml`（基线）、`config_warmup.yaml`（S1 课程预热）、`config_improved.yaml`（I1+I2+I5）、`config_improved_grouped.yaml`（无泄漏复评）、`config_s2.yaml`（Propedia 迁移）、**`config_reg_cls.yaml`（A+C 亲和力分类）**、**`config_s3.yaml`（对接增强迁移，含 dock_score）**、**`config_rank.yaml`（成对排序）**
+
+**成药筛选交付链路**（本项目最终交付形态）：
+```
+候选肽库 ──► ①Lasso 判定器 (lasso_prob)      —— 拓扑是否合理
+        └─► ②结合分类头 (binding_prob)      —— 是否结合
+        └─► ③成对排序模型 (rank_score)      —— 同靶内谁更强
+        └─► ④AutoDock Vina (dock_score)     —— 结构是否可行
+                    └──► 加权 z-score 融合 ──► 候选短名单 CSV
+```
+一键生成：`python -m prp49.candidates --config config_rank.yaml --peptides ... --targets ... --cls_ckpt ... --rank_ckpt ... --lasso_ckpt ... --dock_csv ... --out ../results/candidates.csv`
+（`prp49/candidates.py` 已实现并上传；权重产出后即可运行）
 
 **本机对应路径**：`D:\deepseek_harness\prp49\`（`mvp_cpu/`、`docking/`、`results/`、`scratch/`（分析脚本）、`affinity_data/`）
 

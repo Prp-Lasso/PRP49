@@ -1,0 +1,34 @@
+# Pairwise ranking for drug-candidate prioritisation (within-target preference)
+model:
+  esm_model: ../esm2_35M_hf
+  lassoesm_model: ../LassoESM_hf
+  h_dim: 256
+  n_heads: 3
+  k: 2
+  dropout: 0.3
+  ban_dropout: 0.3
+  freeze_esm: false
+  lassoesm_unfreeze: 1
+
+data:
+  pairs_csv: ../mvp_cpu/affinity_pairs_rank.csv
+  affinity_csv: ../mvp_cpu/affinity_pairs.csv   # peptide-level truth for screening metrics
+  max_len: 1024
+  pep_max_len: 128
+  group_col: prot_id
+
+train:
+  batch_size: 12
+  epochs: 30
+  lr: 0.0002
+  weight_decay: 0.0001
+  patience: 6
+  seed: 42
+
+eval:
+  cv_folds: 5
+  ef_top_frac: 0.1
+
+paths:
+  output_dir: ./runs_rank
+  checkpoint_dir: ./runs_rank/checkpoints
