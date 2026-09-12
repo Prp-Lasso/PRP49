@@ -32,14 +32,15 @@
 
 ## 2. 正在进行中的作业（截至本文档）
 
-| JobID | 名称 | 内容 | 预期 |
+| JobID | 名称 | 内容 | 状态（09-12 09:00 更新）|
 |---|---|---|---|
-| **62363937** | `prp49_dockp` | 对接批 1 剩余（500 对中已完成 56）| 1–1.5 小时 |
-| **62363938** | `prp49_dockp2` | 对接批 2 剩余（1999 对中已完成 342）| 3–5 小时 |
-| **62358463** | `prp49_grp` | **无泄漏验证**（按肽分组 CV，3248 行）| 5–7 小时 |
-| **62359642** | `prp49_s2` | 跨拓扑迁移（Propedia 8346 对）| 数小时 |
-| **62363934** | `prp49_reg` | **亲和力回归**（4321 对实验标签，已修 BCE bug）| 2–4 小时 |
-| 待确认 | `prp49_lassoid2` | Lasso 判定器重训（匹配负样本版）| **训练已完成**：Val F1 **0.7863**；best_model.pt 已落盘（09-11 19:17）；仅后续 predict 阶段因 FASTA 注释行报错（可选修）|
+| **62394452** | `prp49_dockp` | 对接批 1 重提（171 个失败任务：18 任务 OOM + 2 超时）| 已改 MAXPAR=4 / mem=190G 重跑 |
+| **62363938** | `prp49_dockp2` | 对接批 2（已 1843/1999）| 剩 3 个任务在跑 |
+| **62358463** | `prp49_grp` | **无泄漏验证**（按肽分组 CV）| 运行中，**fold0 AUC 0.812 / fold1 AUC 0.849**（还剩 3 折）|
+| **62359642** | `prp49_s2` | 跨拓扑迁移（Propedia 8346 对）| fold1 AUC 0.755 / AP 0.761，fold2 进行中 |
+| **62394451** | `prp49_regc` | **A+C 亲和力分类**（靶内 z-score + 分箱，2462 对）| 重提（首次因 BatchNorm batch=1 崩溃，已修 drop_last）|
+| 已完成 | `prp49_lassoid2` | Lasso 判定器重训（匹配负样本）| Val F1 **0.7863**；`predict.py` 的 FASTA 注释行 bug 已修并上传 |
+| 已停止 | `prp49_reg` | 原亲和力回归（RMSE 6.86，判定不可行）| 已用 A+C 方案取代 |
 
 **查询模板**：
 ```python
@@ -60,8 +61,10 @@ print(out); cli.close()
 | 8M MVP（CPU）| 0.663 | 本机验证 |
 | 650M 随机初始化基线 | 0.594 | 5 折 stratified |
 | I1 课程学习单独 | 0.566 | **无效**（略降）|
-| **I1+I2+I5 全套改进** | **0.8145 ± 0.017** | ⚠️ **疑似肽级泄漏，待 grp 验证** |
-| grp 首轮（无泄漏协议，训练中）| 0.761 | 中途数字，待终值 |
+| **I1+I2+I5 全套改进** | **0.8145 ± 0.017** | 5 折 stratified |
+| **grp（无泄漏协议，按肽分组）** | **fold0 0.812 / fold1 0.849** | ✅ **非泄漏确认**：grouped CV 下同样高（还剩 3 折）|
+| s2（Propedia 跨拓扑迁移）| fold1 0.755 / AP 0.761 | 迁移学习有信号 |
+| regc（A+C 亲和力分类，靶标泛化）| fold0 0.597（仅 1 折，已重提）| 更难的"新靶"任务 |
 | Lasso 判定器（原版，长度捷径）| F1 **0.973** / AUC 0.998 | ❌ 负样本长度分布不重叠 → 虚高 |
 | **Lasso 判定器（匹配负样本，诚实版）** | **Val F1 0.7863** | ✅ best_model.pt 已是此版本（CD-HIT 去重：正 1697 / 负 4414；训练 4888 对）|
 
@@ -71,25 +74,34 @@ print(out); cli.close()
 - 融合 `z(model)+w·z(−dock)`：已知对平均排名 **4.43 → 3.57**（w=1.0）；前 20% 命中 4/8 = 50%（**未达验收 70%**）
 - 主失败案例：**PB1m7×PLXNB1 排 11/11**（人工嫁接肽，模型盲点）、MccJ25×POLR2A 排 10/11
 
+**Propedia 实验复合物对接（2,161 对已聚合）**：`docking_propedia/all_scores.csv`
+- b1：n=324，mean −25.7 / median −28.2；b2：n=1,837，mean −21.2 / median −21.4
+- clash（正分）仅 12 个（0.6%）；98.5% ≤ −8 kcal/mol（都是实验验证的结合对，符合预期）
+- 11 个异常值（|score| > 200，最高 4.4×10⁷）已隔离到 `score_outliers.csv`
+
 ---
 
 ## 4. 数据资产（服务器 `~/LassoPep/`）
 
 | 路径 | 内容 |
 |---|---|
-| `mvp_cpu/train_pairs_hard.csv` | 训练集（正 312 + 硬负样本），improved 用 |
-| `mvp_cpu/affinity_pairs.csv` | **4321 对实验亲和力**（Ki 1615 / Kd 545 / IC50 2161；564 靶；标签列 `energy` = pAffinity 3–12）|
+| `mvp_cpu/train_pairs_hard.csv` | 训练集（正 312 + 硬负样本），improved/grp 用 |
+| `mvp_cpu/affinity_pairs.csv` | 4321 对实验亲和力（Ki 1615 / Kd 545 / IC50 2161；564 靶；`energy` = pAffinity 3–12）|
+| **`mvp_cpu/affinity_cls_pairs.csv`** | **A+C 数据集：2462 对**（靶内 z-score 后 |z|>0.5 分箱，正 1235 / 负 1227；218 靶）|
+| **`mvp_cpu/propedia_dock_pairs.csv`** | **对接增强集：3746 对**（Propedia 实验复合物正样本 1873，对接分 ≤ −12；打乱肽负样本 1873；698 受体；附 `dock_score` 列）|
 | `mvp_cpu/scan_peptides_ext.csv` | 13 条扫描肽 |
 | `mvp_cpu/scan_targets.fasta` | 11 条靶链 |
 | `data/lassopred_database.csv` | LassoPred 库（拓扑注释来源，4749 条；**注意路径是 `data/` 不是根目录**）|
 | `lasso_id_data/` | 判定器数据（正 4749 / 负 20000 / 匹配负 10559）|
-| `LassoPeptideClassifier/` | 判定器代码 + `checkpoints/`（待 `lassoid2` 落盘）|
+| `LassoPeptideClassifier/` | 判定器代码 + `checkpoints/best_model.pt`（诚实版 F1 0.786）|
 | `docking/` | Lasso 矩阵（110 对）+ `tasks.csv` + `pep/`、`rec/`、`pdbqt/`、`out/` |
-| `docking_propedia/` | 批 1（500 对实验复合物）|
+| `docking_propedia/` | 批 1（500 对）→ **`all_scores.csv`（2161 对聚合，含序列+对接分）** + `score_outliers.csv` |
 | `docking_propedia_b2/` | 批 2（1999 对）|
 | `docking_drugpanel/af/` | 41 个成药人靶 AF 模型（备用）|
-| `PRP49/runs*/checkpoints/fold*_best.pt` | 各训练权重 |
+| `PRP49/runs*/checkpoints/fold*_best.pt` | 各训练权重（650M 配置每个 2.75 GB）|
 | `results/scan_matrix_ext.csv` | 模型打分矩阵（13 肽）|
+
+**训练配置清单**（`PRP49/config_*.yaml`）：`config.yaml`（基线）、`config_warmup.yaml`（S1 课程预热）、`config_improved.yaml`（I1+I2+I5）、`config_improved_grouped.yaml`（无泄漏复评）、`config_s2.yaml`（Propedia 迁移）、**`config_reg_cls.yaml`（A+C 亲和力分类）**、**`config_s3.yaml`（对接增强迁移，含 dock_score）**
 
 **本机对应路径**：`D:\deepseek_harness\prp49\`（`mvp_cpu/`、`docking/`、`results/`、`scratch/`（分析脚本）、`affinity_data/`）
 
@@ -100,16 +112,17 @@ print(out); cli.close()
 
 ---
 
-## 5. 下一步待办（按优先级）
+## 5. 下一步待办（按优先级，09-12 09:00 更新）
 
-1. **对接完成**（2499 对）→ 聚合出矩阵 → 转回归标签（`energy`）→ 提交**回归训练 v2**
-2. **`grp` 终值** → 判定 0.8145 是否为泄漏；若跌回 ~0.6，需重设计硬负样本
-3. **判定器对照集复验**：用随机序列 / 打乱序列 / 非 Lasso 天然肽测判定器，确认不是长度捷径
-4. **`reg` 结果**（Spearman / RMSE）→ 决定是否扩大亲和力数据
-5. **融合分析更新**（用 2499 对对接分重做 re-ranking）
-6. **GitHub 同步**（`github_repo/` → https://github.com/Prp-Lasso/PRP49，SSH 密钥已配好，`git push` 前先 `git add`）
-7. **成药面板矩阵**（41 靶 × 13 肽，需先定"成药口袋"盒；AF 模型已下载）
-8. **报告/PPT**：把当前成果整理成汇报（验收线：CV ≥ 0.75 ✓ 已过；已知对 top20% ≥ 70% ✗ 未过）
+1. **`grp` 终值**（还剩 3 折）→ 已初步确认非泄漏（fold0 0.812 / fold1 0.849），补齐后写入正式结果
+2. **`regc`（A+C 亲和力分类）5 折 AUC** → ≥0.65 说明实验亲和力数据可用于"新靶"预测
+3. **对接收尾**：b1 重提（171 对）+ b2 剩 3 → 全量 2,499 完成后重新聚合 `all_scores.csv`
+4. **S3 对接增强迁移训练**：配置与数据已就绪（`config_s3.yaml` + `propedia_dock_pairs.csv`），等 GPU 空闲提交 → 对比是否优于 S2
+5. **融合分析更新**：用 Propedia 2,161 对对接分 + Lasso 矩阵做 re-ranking 复评
+6. **判定器对照集复验**：用随机/打乱/非 Lasso 天然肽验证 F1 0.786（`predict.py` 注释行 bug 已修）
+7. **GitHub 同步**（新增：A+C 与 S3 配置、对接聚合表、架构图）
+8. **成药面板矩阵**（41 靶 × 13 肽，需先定"成药口袋"盒；AF 模型已下载）
+9. **报告/PPT**：验收线 CV ≥ 0.75 ✅ 已过；已知对 top20% ≥ 70% ❌ 未过（当前 50%）
 
 ---
 
@@ -128,17 +141,18 @@ print(out); cli.close()
 | 9 | **盒太小** | 大环肽对接出**假正值**（+104）| 配体派生盒最小边 ≥ 38 Å；本轮上限 44 Å（速度/精度平衡）|
 | 10 | **节点故障** | `NODE_FAIL`（机时自动返还）| 直接重跑 |
 | 11 | **登录节点禁算** | 用户明令 | 安装/训练/对接**全部 sbatch 到计算节点**，登录节点只做上传与提交 |
+| 12 | **BatchNorm + batch=1** | `Expected more than 1 value per channel when training, got input size [1, 256]`（BAN 层 BN）→ 训练在 fold1 崩溃 | 训练 DataLoader 加 `drop_last=True`（已修 `train.py`）|
+| 13 | **同名缓存键冲突** | 聚合脚本里 pep/rec 同名 → 受体序列被肽覆盖（"receptor aa 1-34"）| pep_cache / rec_cache 分开 |
+| 14 | **对接异常分值** | vina 输出 |score| 高达 4.4×10⁷ 污染统计 | 聚合时按物理范围 |score| ≤ 200 过滤，异常值单独落盘 |
+| 15 | **pandas 写 CSV** | `to_csv(newline=...)` 报 TypeError | 用 `lineterminator='\n'` |
+| 16 | **PowerShell 写 JSON 加 BOM** | archify 报 `Unexpected token ''` | 用 write 工具写 JSON，别用 `Set-Content -Encoding UTF8` |
 
 ---
 
-## 7. 对接吞吐优化记录（本轮）
+## 7. 对接吞吐与资源记录（两轮）
 
-原参数每对需 2+ 小时（2.2 小时仅 398/2499）。优化：
-- 盒边长上限 **60 → 44 Å**（b1 均体积 216k → 52.8k Å³；b2 → 37.8k Å³）
-- `--exhaustiveness 8 → 4`
-- 每任务 `--cpu 1 → 2`，并发 b1 `%4→%6`、b2 `%8→%12`
-
-→ 综合提速 12–20 倍。已完成的 398 个结果保留（脚本按 `out/<id>.score` 存在性跳过）。
+**第一轮（盒 44 Å + exh 4 + 2 核）**：原参数每对需 2+ 小时（2.2 小时仅 398/2499）→ 提速 12–20 倍。
+**第二轮（09-12，针对 OOM）**：b1 仍有 18/25 任务 `OUT_OF_MEMORY`（2 个 8 小时超时）→ 再降为 `MAXPAR=4` + `--mem=190G`，失败任务用 `sbatch --array=<job列表>%6` 重提（脚本按 `out/<id>.score` 存在性跳过已完成项）。
 
 ---
 
