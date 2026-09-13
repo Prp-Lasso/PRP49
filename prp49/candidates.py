@@ -187,18 +187,33 @@ def main():
         df['dock_score'] = np.nan
 
     # --- composite score.
-    # rank_score is a *within-target* preference score, so normalise it per target;
-    # the other signals are pair-level and are normalised globally.
-    comp = args.w_binding * zscore(df.binding_prob.fillna(df.binding_prob.mean()))
-    if df.rank_score.notna().any():
+    # Weighted MEAN over the signals actually available for each pair, so that a
+    # pair missing the docking score (no peptide structure) is not penalised by
+    # 40% of the weight simply being absent. rank_score is a within-target
+    # preference, so it is normalised per target; the others are pair-level.
+    signals = [('binding', args.w_binding, zscore(df.binding_prob.fillna(df.binding_prob.mean())),
+                df.binding_prob.notna())]
+    if args.w_rank and df.rank_score.notna().any():
         per_target = df.groupby('target_id')['rank_score'].transform(
             lambda s: (s - s.mean()) / (s.std(ddof=0) + 1e-9) if s.notna().sum() > 1 else 0.0)
-        comp = comp + args.w_rank * per_target.fillna(0.0)
-    if df.lasso_prob.notna().any():
-        comp = comp + args.w_lasso * zscore(df.lasso_prob.fillna(df.lasso_prob.mean()))
-    if df.dock_score.notna().any():
-        comp = comp + args.w_dock * zscore(-df.dock_score.fillna(df.dock_score.mean()))
-    df['composite'] = comp
+        signals.append(('rank', args.w_rank, per_target.fillna(0.0), df.rank_score.notna()))
+    if args.w_lasso and df.lasso_prob.notna().any():
+        signals.append(('lasso', args.w_lasso, zscore(df.lasso_prob.fillna(df.lasso_prob.mean())),
+                        df.lasso_prob.notna()))
+    if args.w_dock and df.dock_score.notna().any():
+        signals.append(('dock', args.w_dock, zscore(-df.dock_score.fillna(df.dock_score.mean())),
+                        df.dock_score.notna()))
+
+    comp = pd.Series(0.0, index=df.index)
+    wsum = pd.Series(0.0, index=df.index)
+    for _, w, vals, avail in signals:
+        v = pd.Series(np.asarray(vals, dtype=float), index=df.index)
+        a = pd.Series(np.asarray(avail, dtype=bool), index=df.index)
+        comp = comp + w * v.where(a, 0.0)
+        wsum = wsum + w * a.astype(float)
+    df['composite'] = comp / wsum.replace(0.0, np.nan)
+    df['n_signals'] = sum(pd.Series(np.asarray(a, dtype=int), index=df.index)
+                          for _, _, _, a in signals)
     df['rank'] = df.composite.rank(ascending=False).astype(int)
 
     cols = ['rank', 'peptide_id', 'target_id', 'composite', 'binding_prob', 'binding_logit',

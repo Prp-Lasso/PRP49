@@ -1,0 +1,18 @@
+{
+  "n_pairs": 4249,
+  "n_checkpoints": 5,
+  "receptors": 722,
+  "auc_vs_easy_shuffled": 0.46980841923990196,
+  "n_easy_shuffled": 1891,
+  "per_receptor_auc_median_easy_shuffled": 0.5,
+  "per_receptor_auc_mean_easy_shuffled": 0.4476416715214196,
+  "n_receptors_easy_shuffled": 204,
+  "auc_vs_hard_real": 0.540753167545581,
+  "n_hard_real": 467,
+  "per_receptor_auc_median_hard_real": 0.5,
+  "per_receptor_auc_mean_hard_real": 0.5087206656589919,
+  "n_receptors_hard_real": 57,
+  "pos_median_score": 0.43502186238765717,
+  "easy_median_score": 0.44819594621658326,
+  "hard_median_score": 0.4299797087907791
+}
