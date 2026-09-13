@@ -39,7 +39,7 @@ def load_fasta(path):
         if line.startswith('>'):
             if name:
                 seqs[name] = ''.join(buf)
-            name, buf = line[1:].split()[0], []
+            name, buf = line[1:].split()[0].split('|')[0], []   # "EDNRB|P24530|human" -> EDNRB
         else:
             buf.append(line)
     if name:
@@ -87,10 +87,16 @@ def main():
     ap.add_argument('--rank_ckpt', default=None, help='pairwise ranking checkpoint (optional)')
     ap.add_argument('--lasso_ckpt', default=None, help='Lasso peptide classifier (optional)')
     ap.add_argument('--dock_csv', default=None, help='CSV with peptide,target,vina score columns')
-    ap.add_argument('--w_binding', type=float, default=0.45)
-    ap.add_argument('--w_rank', type=float, default=0.30)
-    ap.add_argument('--w_lasso', type=float, default=0.15)
-    ap.add_argument('--w_dock', type=float, default=0.10)
+    # Default weights follow a validation finding (2026-09-13): the pairwise
+    # ranking head was trained on ordinary peptides (BindingDB/ChEMBL) and
+    # transfers poorly to lasso peptides - adding it moved literature-supported
+    # pairs from mean rank 23 to 71. Structural docking evidence, by contrast,
+    # moved them from 59 (binding only) to 23. So: binding + docking by default,
+    # rank/lasso available but off unless the caller has evidence for them.
+    ap.add_argument('--w_binding', type=float, default=0.60)
+    ap.add_argument('--w_rank', type=float, default=0.0)
+    ap.add_argument('--w_lasso', type=float, default=0.0)
+    ap.add_argument('--w_dock', type=float, default=0.40)
     ap.add_argument('--out', default='candidates.csv')
     args = ap.parse_args()
 
@@ -146,7 +152,7 @@ def main():
                 sys.path.insert(0, lasso_dir)
             from model import LassoPeptideClassifier  # type: ignore
             from utils import load_classifier_from_checkpoint  # type: ignore
-            lmodel, _ = load_classifier_from_checkpoint(args.lasso_ckpt, device)
+            lmodel = load_classifier_from_checkpoint(args.lasso_ckpt, device=device)
             pep_list = sorted({p for _, p in peps})
             emb_tok = AutoTokenizer.from_pretrained(cfg.model.esm_model)
             from transformers import AutoModel
@@ -171,17 +177,23 @@ def main():
         tcol = next((c for c in dk.columns if c.lower() in ('target', 'prot_id', 'rec_seq')), None)
         scol = next((c for c in dk.columns if 'score' in c.lower()), None)
         if pcol and tcol and scol:
-            dk = dk.rename(columns={pcol: 'peptide', tcol: 'target', scol: 'dock_score'})
-            df = df.merge(dk[['peptide', 'target', 'dock_score']], on=['peptide', 'target'], how='left')
+            dk = dk.rename(columns={pcol: 'peptide_id', tcol: 'target_id', scol: 'dock_score'})
+            # match on IDs (the peptide/target sequence columns are not unique keys here)
+            df = df.merge(dk[['peptide_id', 'target_id', 'dock_score']],
+                          on=['peptide_id', 'target_id'], how='left')
         else:
             df['dock_score'] = np.nan
     else:
         df['dock_score'] = np.nan
 
-    # --- composite score: weighted z-scores (rank score is computed per target)
+    # --- composite score.
+    # rank_score is a *within-target* preference score, so normalise it per target;
+    # the other signals are pair-level and are normalised globally.
     comp = args.w_binding * zscore(df.binding_prob.fillna(df.binding_prob.mean()))
     if df.rank_score.notna().any():
-        comp = comp + args.w_rank * zscore(df.rank_score.fillna(df.rank_score.mean()))
+        per_target = df.groupby('target_id')['rank_score'].transform(
+            lambda s: (s - s.mean()) / (s.std(ddof=0) + 1e-9) if s.notna().sum() > 1 else 0.0)
+        comp = comp + args.w_rank * per_target.fillna(0.0)
     if df.lasso_prob.notna().any():
         comp = comp + args.w_lasso * zscore(df.lasso_prob.fillna(df.lasso_prob.mean()))
     if df.dock_score.notna().any():
@@ -192,9 +204,22 @@ def main():
     cols = ['rank', 'peptide_id', 'target_id', 'composite', 'binding_prob', 'binding_logit',
             'rank_score', 'lasso_prob', 'dock_score', 'peptide', 'target']
     df = df[[c for c in cols if c in df.columns]].sort_values('rank')
-    df.to_csv(args.out, index=False, lineterminator='\n')
+    df.round(4).to_csv(args.out, index=False, lineterminator='\n')
+
+    # coverage / calibration diagnostics (absolute probabilities matter for screening)
     print(f'wrote {args.out}: {len(df)} pairs')
-    print(df.head(12).to_string(index=False))
+    print('score coverage: ' + ', '.join(f'{c}={df[c].notna().mean()*100:.0f}%'
+                                         for c in ('binding_prob', 'rank_score', 'lasso_prob', 'dock_score')))
+    print(f'binding_prob distribution: min {df.binding_prob.min():.3f} · median {df.binding_prob.median():.3f} '
+          f'· max {df.binding_prob.max():.3f} · frac>0.9 {100*(df.binding_prob > 0.9).mean():.0f}%')
+    if df.lasso_prob.notna().any():
+        print(f'lasso_prob distribution: min {df.lasso_prob.min():.3f} · median {df.lasso_prob.median():.3f} '
+              f'· max {df.lasso_prob.max():.3f}')
+    if df.dock_score.notna().any():
+        print(f'dock_score distribution: min {df.dock_score.min():.1f} · median {df.dock_score.median():.1f} '
+              f'· max {df.dock_score.max():.1f}')
+    print(df[['rank', 'peptide_id', 'target_id', 'composite', 'binding_prob',
+              'rank_score', 'lasso_prob', 'dock_score']].head(12).to_string(index=False))
 
 
 if __name__ == '__main__':
