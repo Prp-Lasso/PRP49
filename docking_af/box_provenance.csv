@@ -1,0 +1,10 @@
+target,method,quality,cx,cy,cz,sx,sy,sz
+C3,local<=15A,rmsd 0.55A,-49.5,7.6,49.7,38.0,38.0,38.0
+CLPB,global(fallback),rmsd 0.00A,-3.0,12.8,-19.7,112.0,101.0,124.0
+EDNRB,contact<=8A,contacts,5.4,1.5,-10.7,38.0,38.0,39.0
+FKBP1A,local<=15A,rmsd 0.40A,-0.3,-0.5,3.0,42.0,46.0,55.0
+MDM2,contact<=8A,contacts,-0.8,7.1,-15.1,38.0,38.0,38.0
+NPR1,local<=15A,rmsd 0.00A,-7.5,-0.8,27.7,98.0,90.0,123.0
+PLXNB1,contact<=8A,contacts,11.3,13.2,-0.1,38.0,38.0,38.0
+POLR2A,global(fallback),rmsd 1.74A,-12.0,-6.5,-33.5,120.0,64.0,106.0
+PPIA,local<=15A,rmsd 0.22A,-0.4,-15.2,-6.5,56.0,53.0,83.0

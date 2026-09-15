@@ -1,0 +1,4 @@
+target,method,source_pdb,receptor_chain,ligand_chain,n_contacts,n_mapped,cx,cy,cz,sx,sy,sz
+EDNRB,contact<=8A,9KDF,R,A,55,53,5.4,1.5,-10.7,38,38,39
+MDM2,contact<=8A,1YCR,A,B,33,33,-0.8,7.1,-15.1,38,38,38
+PLXNB1,contact<=8A,7VF3,A,B,57,57,11.3,13.2,-0.1,38,38,38
