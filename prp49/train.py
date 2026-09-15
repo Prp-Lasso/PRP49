@@ -10,6 +10,7 @@ from transformers import AutoTokenizer
 from sklearn.model_selection import StratifiedKFold, GroupKFold
 
 from .config import Config
+from .ckpt import maybe_resume, save_best, save_resume
 from .data import PairDataset, collate_fn, load_pairs, load_alignment_labels, load_topo_annotations
 from .model import InteractionPredictor
 from .losses import binary_loss, alignment_loss, ranking_loss
@@ -217,26 +218,37 @@ def run_cv(cfg, device):
                                            energy_col=cfg.data.get('energy_col') or 'energy'),
                                batch_size=cfg.train.batch_size, shuffle=False, collate_fn=collate_fn)
         best_auc, bad, best_state = -1.0, 0, None
-        for ep in range(cfg.train.epochs):
+        ckpt_dir = cfg.paths.checkpoint_dir
+        os.makedirs(ckpt_dir, exist_ok=True)
+        # Resume support: a wall-clock kill used to discard every completed epoch
+        # because state lived only in memory. Now every `ckpt_every` epochs the
+        # rolling checkpoint is overwritten atomically, and training restarts from it.
+        start_ep, resumed_best = maybe_resume(ckpt_dir, fold, model, optimizer, device)
+        if resumed_best > best_auc:
+            best_auc = resumed_best
+        ckpt_every = int(cfg.train.get('ckpt_every') or 10)
+        for ep in range(start_ep, cfg.train.epochs):
             loss, n_align = train_one(model, tr_loader, optimizer, pos_weight, cfg, device)
             sc, _ = predict(model, te_loader, device)
             auc, ap = evaluate_scores(sc, all_labels[eval_te], cfg.train.label_type)
             if auc > best_auc:
                 best_auc, bad = auc, 0
                 best_state = copy.deepcopy(model.state_dict())
+                save_best(ckpt_dir, fold, best_state, {'auc': float(auc), 'ap': float(ap), 'ep': ep})
             else:
                 bad += 1
                 if bad >= cfg.train.patience:
                     break
+            if (ep + 1) % ckpt_every == 0:
+                save_resume(ckpt_dir, fold, model, optimizer, ep, best_auc)
+                print(f'  [ckpt] fold {fold} ep {ep}: rolling checkpoint saved', flush=True)
             if ep % 10 == 0:
                 m1, m2 = ('Spearman', 'RMSE') if cfg.train.label_type == 'energy' else ('AUC', 'AP')
                 v2 = -ap if cfg.train.label_type == 'energy' else ap
                 print(f'  fold {fold} ep {ep}: loss {loss:.4f} val {m1} {auc:.3f} '
                       f'{m2} {v2:.3f} (align batches {n_align})', flush=True)
-        model.load_state_dict(best_state)
-        ckpt_dir = cfg.paths.checkpoint_dir
-        os.makedirs(ckpt_dir, exist_ok=True)
-        torch.save(best_state, os.path.join(ckpt_dir, f'fold{fold}_best.pt'))
+        save_resume(ckpt_dir, fold, model, optimizer, cfg.train.epochs - 1, best_auc)
+        model.load_state_dict(best_state if best_state is not None else model.state_dict())
         sc, _ = predict(model, te_loader, device)
         auc, ap = evaluate_scores(sc, all_labels[eval_te], cfg.train.label_type)
         fold_metrics.append(dict(auc=float(auc), ap=float(ap)))

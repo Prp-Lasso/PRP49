@@ -28,6 +28,7 @@ from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 
 from .config import Config
+from .ckpt import maybe_resume, save_best, save_resume
 from .data import PairDataset, collate_fn
 from .model import InteractionPredictor
 
@@ -114,7 +115,13 @@ def main():
         base_mean = float(tr.energy.mean())
         tgt_mean = tr.groupby('prot_id').energy.mean()
         best = {'rmse': 1e9}
-        for ep in range(cfg.train.epochs):
+        ck_dir = cfg.paths.get('checkpoint_dir') or 'runs_reg_bound/checkpoints'
+        os.makedirs(ck_dir, exist_ok=True)
+        # Periodic + resumable checkpoints: a time-limit kill previously threw away
+        # every epoch of the fold because state was only kept in memory.
+        start_ep, resumed = maybe_resume(ck_dir, fi, model, opt, args.device)
+        ckpt_every = int(cfg.train.get('ckpt_every') or 10)
+        for ep in range(start_ep, cfg.train.epochs):
             model.train()
             tot, nb = 0.0, 0
             for batch in tr_loader:
@@ -137,10 +144,12 @@ def main():
             if r < best['rmse']:
                 best = {'rmse': r, 'epoch': ep, 'loss': tot / max(nb, 1),
                         'pred_min': float(pred.min()), 'pred_max': float(pred.max())}
-                ck_dir = cfg.paths.get('checkpoint_dir') or 'runs_reg_bound/checkpoints'
-                os.makedirs(ck_dir, exist_ok=True)
-                torch.save({'state_dict': model.state_dict(), 'metrics': best},
-                           os.path.join(ck_dir, f'fold{fi}_best.pt'))
+                save_best(ck_dir, fi, model.state_dict(), best)
+            if (ep + 1) % ckpt_every == 0:
+                # save_resume expects "higher is better", so pass -RMSE
+                save_resume(ck_dir, fi, model, opt, ep, -best['rmse'],
+                            extra={'rmse': best['rmse']})
+                print(f'  [ckpt] fold {fi} ep {ep}: rolling checkpoint saved', flush=True)
             if ep % 5 == 0:
                 base_r = rmse(np.full(len(y), base_mean), y)
                 print(f'  fold {fi} ep {ep}: loss {tot/max(nb,1):.4f} RMSE {r:.3f} '
@@ -160,6 +169,10 @@ def main():
         print(f'fold {fi}: RMSE {res["rmse"]:.3f} vs mean-baseline {base_r:.3f} | '
               f'per-target median {res["rmse_per_target_median"]} | '
               f'pred range [{res["pred_min"]:.1f}, {res["pred_max"]:.1f}] | r={res["pearson"]}', flush=True)
+        # Write after EVERY fold: a wall-clock timeout previously discarded all five
+        # folds of work because the JSON was only written at the very end.
+        with open(args.out, 'w') as f:
+            json.dump({'folds': results, 'partial': True, 'config': vars(args)}, f, indent=2)
         del model
         torch.cuda.empty_cache()
 

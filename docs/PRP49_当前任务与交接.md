@@ -222,6 +222,8 @@ print(out); cli.close()
 | 27 | **作业时限按"单方案"估但脚本里串行跑多方案** | RMSE 约束三方案写在一个 `job_reg_bound.sh` 里 → 8 小时只够跑半个方案 A，**无 JSON 产出** | 改成 `--array=1-3` 并行，每方案独立作业 |
 | 28 | **靶标 ID 用 PDB 链描述** | `train_pairs_hard.csv` 里 81% 的 prot_id 是 `"Chains A, B"` 之类，**238 个蛋白序列只对应 49 个 ID** → 硬负样本的"同靶"假设部分失效 | 重建为 `train_pairs_v2.csv`：靶以**序列**为键（238 个），负样本 = 同序列 × 不同家族 |
 | 29 | **改了一半的索引：`all_scores[te] = sc`** | 评估排除传播样本后 `sc` 长度为 705 而 `te` 为 800 → **形状不匹配，fold 0 末崩溃**（白跑 2.6 小时）| 散播必须用同一索引 `all_scores[eval_te] = sc`；且 `overall` 指标也要用 `eval_mask` 过滤（否则未赋值的传播行以 0.0 参与计算）|
+| 30 | **检查点只在"每折结束"保存，epoch 循环内不落盘** | 一旦撞上 wall-clock 时间上限，**内存中的 best 权重与已完成的 epoch 全部丢失** —— 本项目因此白跑 **3 次**（regb 串行 8h、regb2 8h、MTL 6h）；regb2 那次连 5 折结果都没有，因为 JSON 也只在最后写 | 新增 `prp49/ckpt.py`：**每 `ckpt_every`（默认 10）个 epoch 覆盖式保存 `fold{i}_latest.pt`**（含 optimizer + epoch，支持续训），**原子写入**（`.tmp` + `os.replace`，写盘中途被杀也不会损坏）；`fold{i}_best.pt` 仍是交付用最佳权重。每个训练脚本启动时 `maybe_resume()` 自动续训。regb2 的 JSON 也改为**每折写一次** |
+| 31 | **内联 `python -c "..."` 嵌套引号** | 多次因 PowerShell 引号转义导致语法错误、甚至**整个命令块未执行**（config 修改静默失败）| 一律改为**写脚本文件再执行**，不用内联多行命令 |
 
 1. **`prp49_xneg`（特异性增强训练，62451606）**：训练集加入 **352 个跨靶负样本** + 2 个实验确认阴性 → 直接针对假阳性缺陷
 2. **`prp49_calib`（概率校准，62451607）**：温度缩放 + 阈值选择（ECE 前后对比、precision≥0.9 的操作点）

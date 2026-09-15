@@ -23,6 +23,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
 from transformers import AutoTokenizer
 
+from .ckpt import maybe_resume, save_best, save_resume
 from .config import Config
 from .model import InteractionPredictor
 
@@ -204,7 +205,11 @@ def run(cfg, device):
                                collate_fn=pair_collate, drop_last=True)
 
         best_acc, bad, best_state = -1.0, 0, None
-        for ep in range(cfg.train.epochs):
+        ckpt_dir = cfg.paths.checkpoint_dir
+        os.makedirs(ckpt_dir, exist_ok=True)
+        start_ep, _ = maybe_resume(ckpt_dir, fi, model, opt, device)
+        ckpt_every = int(cfg.train.get('ckpt_every') or 5)
+        for ep in range(start_ep, cfg.train.epochs):
             model.train()
             tot, n = 0.0, 0
             for batch in tr_loader:
@@ -242,16 +247,19 @@ def run(cfg, device):
             if vacc > best_acc:
                 best_acc, bad = vacc, 0
                 best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+                save_best(ckpt_dir, fi, best_state, {'pair_acc': float(vacc), 'ep': ep})
             else:
                 bad += 1
                 if bad >= cfg.train.patience:
                     print(f'  fold {fi}: early stop at ep {ep}', flush=True)
                     break
+            if (ep + 1) % ckpt_every == 0:
+                save_resume(ckpt_dir, fi, model, opt, ep, best_acc)
+                print(f'  [ckpt] fold {fi} ep {ep}: rolling checkpoint saved', flush=True)
 
         if best_state is not None:
             model.load_state_dict(best_state)
-        torch.save({'state_dict': model.state_dict(), 'config': cfg.model._d},
-                   os.path.join(cfg.paths.checkpoint_dir, f'fold{fi}_best.pt'))
+        save_resume(ckpt_dir, fi, model, opt, cfg.train.epochs - 1, best_acc)
         m = evaluate(model, te_df, tok, device, cfg)
         m['fold'] = fi
         print(f'fold {fi}: ' + ' '.join(f'{k}={v:.4f}' if isinstance(v, float) else f'{k}={v}'

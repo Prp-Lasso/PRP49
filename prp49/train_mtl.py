@@ -30,6 +30,7 @@ from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 
 from .config import Config
+from .ckpt import maybe_resume, save_best, save_resume
 from .data import PairDataset, collate_fn
 from .losses import alignment_loss
 from .model import InteractionPredictor
@@ -109,8 +110,12 @@ def main():
         te_loader = loader_for(te, tok, cfg.data.max_len, 24, False)
         bce = nn.BCEWithLogitsLoss()
 
+        ckpt_dir = cfg.paths.get('checkpoint_dir') or 'runs_mtl/checkpoints'
+        os.makedirs(ckpt_dir, exist_ok=True)
+        start_ep, _ = maybe_resume(ckpt_dir, fi, model, opt, args.device)
+        ckpt_every = int(cfg.train.get('ckpt_every') or 5)
         best = {'dom': -1.0}
-        for ep in range(cfg.train.epochs):
+        for ep in range(start_ep, cfg.train.epochs):
             model.train()
             # Alternate domains rather than running both every step: the in-domain
             # target sequences are up to 1024 tokens, and two batches per step
@@ -142,15 +147,17 @@ def main():
             aux_auc = evaluate(model, aux_te_loader, args.device)
             if dom_auc == dom_auc and dom_auc > best['dom']:
                 best = {'dom': dom_auc, 'aux': aux_auc, 'epoch': ep, 'loss': tot / max(nb, 1)}
+                save_best(ckpt_dir, fi, model.state_dict(), best)
+            if (ep + 1) % ckpt_every == 0:
+                save_resume(ckpt_dir, fi, model, opt, ep, best['dom'])
+                print(f'  [ckpt] fold {fi} ep {ep}: rolling checkpoint saved', flush=True)
             if ep % 2 == 0:
                 print(f'  fold {fi} ep {ep}: loss {tot/max(nb,1):.4f} '
                       f'in-domain AUC {dom_auc:.3f} | cross-domain AUC {aux_auc:.3f}', flush=True)
         print(f'fold {fi}: in-domain {best["dom"]:.3f} | cross-domain {best.get("aux", float("nan")):.3f} '
               f'(ep {best.get("epoch")}, {time.time()-t0:.0f}s)', flush=True)
         results.append(best)
-        ck = os.path.join(cfg.paths.checkpoint_dir or 'runs_mtl/checkpoints', f'fold{fi}_best.pt')
-        os.makedirs(os.path.dirname(ck), exist_ok=True)
-        torch.save({'state_dict': model.state_dict(), 'metrics': best}, ck)
+        save_resume(ckpt_dir, fi, model, opt, cfg.train.epochs - 1, best['dom'])
         del model
         torch.cuda.empty_cache()
 
