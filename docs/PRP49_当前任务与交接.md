@@ -32,16 +32,25 @@
 
 ## 2. 正在进行中的作业（截至本文档）
 
-| JobID | 名称 | 内容 | 状态（09-12 09:00 更新）|
+**当前（09-16 08:05 快照）**
+
+| JobID | 名称 | 内容 | 状态 |
 |---|---|---|---|
-| **62394452** | `prp49_dockp` | 对接批 1 重提（171 个失败任务：18 任务 OOM + 2 超时）| 已改 MAXPAR=4 / mem=190G 重跑 |
-| **62363938** | `prp49_dockp2` | 对接批 2（已 1843/1999）| 剩 3 个任务在跑 |
-| **62358463** | `prp49_grp` | **无泄漏验证**（按肽分组 CV）| 运行中，**fold0 AUC 0.812 / fold1 AUC 0.849**（还剩 3 折）|
-| **62359642** | `prp49_s2` | 跨拓扑迁移（Propedia 8346 对）| fold1 AUC 0.755 / AP 0.761，fold2 进行中 |
-| **62394451** | `prp49_regc` | **A+C 亲和力分类**（靶内 z-score + 分箱，2462 对）| 重提（首次因 BatchNorm batch=1 崩溃，已修 drop_last）|
-| **62394923** | `prp49_rank` | **成对排序（成药筛选导向）**：16,819 对同靶内偏好样本，5 折 grouped CV | 已提交排队；指标 = pair-acc / 逐靶 Spearman / NDCG@5 / EF@10% |
-| 已完成 | `prp49_lassoid2` | Lasso 判定器重训（匹配负样本）| Val F1 **0.7863**；`predict.py` 的 FASTA 注释行 bug 已修并上传 |
-| 已停止 | `prp49_reg` | 原亲和力回归（RMSE 6.86，判定不可行）| 已用 A+C 方案取代 |
+| **62593230** | `prp49_prop` | **路线 A**：家族软标签传播（352→759 正样本，family-grouped CV）| 运行 10.5h，2/5 折完成，**两折均 0.726**（基线 0.8142）→ 很可能判负；12h 时限，超时也保住已存 `fold{i}_best.pt` |
+| **62602714** | `prp49_regb2` | **RMSE 约束回归** A/B/C 三方案（array，16h 时限，每折增量写 JSON）| 三方案并行运行 5h+；方案 A fold0 RMSE **1.584** vs 基线 2.295、**Pearson 0.720** |
+| 已完成 | `prp49_dockaf` 62603981 | **AF 来源对接数据集**（9 靶 × 11 肽 = 99 对）| ✅ 99/99、0 失败 → 见**附录 A**（结构来源主导对接结果）|
+
+**历史作业（09-12 快照，多数已完成）**
+
+| JobID | 名称 | 内容 | 状态 |
+|---|---|---|---|
+| 62394452 | `prp49_dockp` | 对接批 1 重提（171 失败任务：18 OOM + 2 超时）| 已改 MAXPAR=4 / mem=190G 重跑 |
+| 62363938 | `prp49_dockp2` | 对接批 2（1,843/1,999）| 剩 3 任务（不再等）|
+| 62358463 | `prp49_grp` | **无泄漏验证**（按肽分组 CV）| ✅ fold0 0.812 / fold1 0.849 |
+| 62359642 | `prp49_s2` | 跨拓扑迁移（Propedia 8,346 对）| fold1 0.755 / AP 0.761 |
+| 62394451 | `prp49_regc` | **A+C 亲和力分类** | ✅ 5 折 AUC 0.6312 |
+| 62406210 | `prp49_rank` | 成对排序（成药筛选导向）| ✅ 见路线计划 |
+| 已停止 | `prp49_reg` | 原亲和力回归（RMSE 6.86，判定不可行）| 已被 A+C 取代 |
 
 **查询模板**：
 ```python
@@ -201,7 +210,7 @@ print(out); cli.close()
 
 ---
 
-## 8. 四项后续任务进展（09-14 12:25）
+## 6. 四项后续任务进展（09-14 12:25）
 
 | 任务 | 状态 | 结果/说明 |
 |---|---|---|
@@ -229,7 +238,75 @@ print(out); cli.close()
 
 ---
 
-## 九、AF 来源对接数据集（2026-09-16，分支任务）
+## 7. 必须记住的坑（已踩过，勿重蹈）
+
+| # | 坑 | 症状 | 修复 |
+|---|---|---|---|
+| 1 | **CSV 行尾 CRLF** | vina 报参数错误/秒退（`\r` 混入字段）| 生成时 `newline='\n'`；上传后 `sed -i "s/\r$//"`（已踩 3 次）|
+| 2 | **pep/rec 同名文件** | vina 把受体当配体 → `PDBQT parsing error` | 脚本里加前缀 `pep_` / `rec_` |
+| 3 | **回归用 BCE** | loss = −790、RMSE = 503 | `label_type=energy` 走 Huber 回归损失（已修 `train.py`）|
+| 4 | **模块版本不同步** | `PairDataset got unexpected kwarg 'energy_col'` | 上传代码时同步 `data.py` + `train.py` + `eval.py` 全套 |
+| 5 | **GroupKFold + 负样本同组** | val AUC = nan | 负样本组 id 唯一化，或改 `cv_mode: stratified` |
+| 6 | **对接 OOM** | `OUT_OF_ME+`，部分任务被杀 | 降并发 + 加 mem（64c512g 每核 8G 上限）|
+| 7 | **SFTP 路径** | `FileNotFoundError` | SFTP **不展开 `~`**、**不自动建目录**：先 `mkdir -p`，传绝对路径 |
+| 8 | **判定器长度捷径** | 负样本长度分布与正样本不重叠（正 20-50 aa vs 负 100-500 aa）→ F1 虚高 | 已建"匹配负样本"（打乱 + 前导肽 + 同长度细菌）→ `lassoid2` 重训 |
+| 9 | **盒太小** | 大环肽对接出**假正值**（+104）| 配体派生盒最小边 ≥ 38 Å；本轮上限 44 Å（速度/精度平衡）|
+| 10 | **节点故障** | `NODE_FAIL`（机时自动返还）| 直接重跑 |
+| 11 | **登录节点禁算** | 用户明令 | 安装/训练/对接**全部 sbatch 到计算节点**，登录节点只做上传与提交 |
+| 12 | **BatchNorm + batch=1** | `Expected more than 1 value per channel when training, got input size [1, 256]`（BAN 层 BN）→ 训练在 fold1 崩溃 | 训练 DataLoader 加 `drop_last=True`（已修 `train.py`）|
+| 13 | **同名缓存键冲突** | 聚合脚本里 pep/rec 同名 → 受体序列被肽覆盖（"receptor aa 1-34"）| pep_cache / rec_cache 分开 |
+| 14 | **对接异常分值** | vina 输出 |score| 高达 4.4×10⁷ 污染统计 | 聚合时按物理范围 |score| ≤ 200 过滤，异常值单独落盘 |
+| 15 | **pandas 写 CSV** | `to_csv(newline=...)` 报 TypeError | 用 `lineterminator='\n'` |
+| 16 | **PowerShell 写 JSON 加 BOM** | archify 报 `Unexpected token ''` | 用 write 工具写 JSON，别用 `Set-Content -Encoding UTF8` |
+| 17 | **PDB 记录名切片** | `line[:6] == 'ATOM'` 永假（前 6 列是 `"ATOM  "` 带空格）→ **39 个受体文件全成 2 字节空文件**，429 个对接任务静默失败 | 必须 `.strip()` 后比较（已修 `scratch/find_pockets.py`）|
+| 18 | **空 score 文件欺骗进度检查** | `ls out/*.score \| wc -l` 显示 429/429，实际全是 0 字节 | 检查**非空**文件数：`find out -name "*.score" -size +0c \| wc -l` |
+| 19 | **同一受体两种命名** | 对接表用 `ITGAVB3`（二聚体）、候选矩阵用 `ITGAV`/`ITGB3`（单链）→ merge 静默丢分（coverage 69%），而**实验确认的硬负样本恰好在这两列** → 假阳性排进前 30% | 在 `candidates.py` 内映射：只把 `ITGAVB3` 那些行复制成 `ITGB3`（**复制整表会凭空造分**）|
+| 20 | **换数据源未核对靶集** | 39 个"成药靶"（EGFR/JAK2/BCL2…）与原 11 个 Lasso 靶**完全不重叠**，换表后 coverage 掉到 **0%** | 换数据源后必须打印 coverage；两个靶集是互补的，不能互相替代 |
+
+---
+
+## 8. 对接吞吐与资源记录（两轮）
+
+**第一轮（盒 44 Å + exh 4 + 2 核）**：原参数每对需 2+ 小时（2.2 小时仅 398/2499）→ 提速 12–20 倍。
+**第二轮（09-12，针对 OOM）**：b1 仍有 18/25 任务 `OUT_OF_MEMORY`（2 个 8 小时超时）→ 再降为 `MAXPAR=4` + `--mem=190G`，失败任务用 `sbatch --array=<job列表>%6` 重提（脚本按 `out/<id>.score` 存在性跳过已完成项）。
+
+---
+
+## 9. 关键设计决策（勿轻易推翻）
+
+1. **评估协议**：主结果用 **grouped CV（按肽序列分组）**；stratified 数字仅作对照（有泄漏）。
+2. **硬负样本**：同靶 × 其他家族肽 —— 用于逼模型学"肽-靶兼容性"而非"肽身份"，但因此必须用 grouped CV 评估。
+3. **L_align 结构对齐**：用复合物接触图监督 BAN 注意力（`align_loss_weight=0.1`，仅注释对生效）。
+4. **对接协议**：AutoDock Vina 1.2.3，刚性配体（大环全冻结，`rigidify.py`），盒=肽自身坐标 + pad，exhaustiveness 4，num_modes 5。
+5. **判定器集成**：上游 LassoPred 零改动，`prp49/lasso_id.py` 做适配层。
+6. **回归头**：`dual_head: true` 时主头分类 + 副头回归；`label_type=energy` 时主头也做回归。
+
+---
+
+## 10. 常用命令速查
+
+```bash
+# 队列
+squeue -u $USER -o "%.10i %.14j %.8T %.10M"
+
+# 作业历史
+sacct -j <jobid> --format=JobID%14,JobName%14,State%14,Elapsed,ExitCode -X
+
+# 提交（在 ~/LassoPep 下）
+sbatch scripts/job_train_improved.sh
+sbatch scripts/job_dock_propedia.sh
+sbatch --array=71-80%2 --mem=32G scripts/job_dock_array.sh   # 覆盖式重跑指定任务
+
+# 取消
+scancel <jobid>
+
+# 查看输出
+tail -40 prp49_<name>-<jobid>.out
+```
+
+---
+
+## 附录 A、AF 来源对接数据集（2026-09-16，分支任务）
 
 **背景**：用户指出对接受体结构**来源不一**。核查后发现比预想严重：
 **11 个 Lasso 靶中 `CLPB` 与 `NPR1` 本身就是 AlphaFold 模型**（源自 `CLPB_AF.pdb` / `NPR1_AF.pdb`；
@@ -288,68 +365,3 @@ Siamycin-I×EDNRB +43.9、Sphingopyxin-I×EDNRB +41.5、Ubonodin×MDM2 +28.0、S
 
 ---
 
-## 6. 必须记住的坑（已踩过，勿重蹈）
-
-| # | 坑 | 症状 | 修复 |
-|---|---|---|---|
-| 1 | **CSV 行尾 CRLF** | vina 报参数错误/秒退（`\r` 混入字段）| 生成时 `newline='\n'`；上传后 `sed -i "s/\r$//"`（已踩 3 次）|
-| 2 | **pep/rec 同名文件** | vina 把受体当配体 → `PDBQT parsing error` | 脚本里加前缀 `pep_` / `rec_` |
-| 3 | **回归用 BCE** | loss = −790、RMSE = 503 | `label_type=energy` 走 Huber 回归损失（已修 `train.py`）|
-| 4 | **模块版本不同步** | `PairDataset got unexpected kwarg 'energy_col'` | 上传代码时同步 `data.py` + `train.py` + `eval.py` 全套 |
-| 5 | **GroupKFold + 负样本同组** | val AUC = nan | 负样本组 id 唯一化，或改 `cv_mode: stratified` |
-| 6 | **对接 OOM** | `OUT_OF_ME+`，部分任务被杀 | 降并发 + 加 mem（64c512g 每核 8G 上限）|
-| 7 | **SFTP 路径** | `FileNotFoundError` | SFTP **不展开 `~`**、**不自动建目录**：先 `mkdir -p`，传绝对路径 |
-| 8 | **判定器长度捷径** | 负样本长度分布与正样本不重叠（正 20-50 aa vs 负 100-500 aa）→ F1 虚高 | 已建"匹配负样本"（打乱 + 前导肽 + 同长度细菌）→ `lassoid2` 重训 |
-| 9 | **盒太小** | 大环肽对接出**假正值**（+104）| 配体派生盒最小边 ≥ 38 Å；本轮上限 44 Å（速度/精度平衡）|
-| 10 | **节点故障** | `NODE_FAIL`（机时自动返还）| 直接重跑 |
-| 11 | **登录节点禁算** | 用户明令 | 安装/训练/对接**全部 sbatch 到计算节点**，登录节点只做上传与提交 |
-| 12 | **BatchNorm + batch=1** | `Expected more than 1 value per channel when training, got input size [1, 256]`（BAN 层 BN）→ 训练在 fold1 崩溃 | 训练 DataLoader 加 `drop_last=True`（已修 `train.py`）|
-| 13 | **同名缓存键冲突** | 聚合脚本里 pep/rec 同名 → 受体序列被肽覆盖（"receptor aa 1-34"）| pep_cache / rec_cache 分开 |
-| 14 | **对接异常分值** | vina 输出 |score| 高达 4.4×10⁷ 污染统计 | 聚合时按物理范围 |score| ≤ 200 过滤，异常值单独落盘 |
-| 15 | **pandas 写 CSV** | `to_csv(newline=...)` 报 TypeError | 用 `lineterminator='\n'` |
-| 16 | **PowerShell 写 JSON 加 BOM** | archify 报 `Unexpected token ''` | 用 write 工具写 JSON，别用 `Set-Content -Encoding UTF8` |
-| 17 | **PDB 记录名切片** | `line[:6] == 'ATOM'` 永假（前 6 列是 `"ATOM  "` 带空格）→ **39 个受体文件全成 2 字节空文件**，429 个对接任务静默失败 | 必须 `.strip()` 后比较（已修 `scratch/find_pockets.py`）|
-| 18 | **空 score 文件欺骗进度检查** | `ls out/*.score \| wc -l` 显示 429/429，实际全是 0 字节 | 检查**非空**文件数：`find out -name "*.score" -size +0c \| wc -l` |
-| 19 | **同一受体两种命名** | 对接表用 `ITGAVB3`（二聚体）、候选矩阵用 `ITGAV`/`ITGB3`（单链）→ merge 静默丢分（coverage 69%），而**实验确认的硬负样本恰好在这两列** → 假阳性排进前 30% | 在 `candidates.py` 内映射：只把 `ITGAVB3` 那些行复制成 `ITGB3`（**复制整表会凭空造分**）|
-| 20 | **换数据源未核对靶集** | 39 个"成药靶"（EGFR/JAK2/BCL2…）与原 11 个 Lasso 靶**完全不重叠**，换表后 coverage 掉到 **0%** | 换数据源后必须打印 coverage；两个靶集是互补的，不能互相替代 |
-
----
-
-## 7. 对接吞吐与资源记录（两轮）
-
-**第一轮（盒 44 Å + exh 4 + 2 核）**：原参数每对需 2+ 小时（2.2 小时仅 398/2499）→ 提速 12–20 倍。
-**第二轮（09-12，针对 OOM）**：b1 仍有 18/25 任务 `OUT_OF_MEMORY`（2 个 8 小时超时）→ 再降为 `MAXPAR=4` + `--mem=190G`，失败任务用 `sbatch --array=<job列表>%6` 重提（脚本按 `out/<id>.score` 存在性跳过已完成项）。
-
----
-
-## 8. 关键设计决策（勿轻易推翻）
-
-1. **评估协议**：主结果用 **grouped CV（按肽序列分组）**；stratified 数字仅作对照（有泄漏）。
-2. **硬负样本**：同靶 × 其他家族肽 —— 用于逼模型学"肽-靶兼容性"而非"肽身份"，但因此必须用 grouped CV 评估。
-3. **L_align 结构对齐**：用复合物接触图监督 BAN 注意力（`align_loss_weight=0.1`，仅注释对生效）。
-4. **对接协议**：AutoDock Vina 1.2.3，刚性配体（大环全冻结，`rigidify.py`），盒=肽自身坐标 + pad，exhaustiveness 4，num_modes 5。
-5. **判定器集成**：上游 LassoPred 零改动，`prp49/lasso_id.py` 做适配层。
-6. **回归头**：`dual_head: true` 时主头分类 + 副头回归；`label_type=energy` 时主头也做回归。
-
----
-
-## 9. 常用命令速查
-
-```bash
-# 队列
-squeue -u $USER -o "%.10i %.14j %.8T %.10M"
-
-# 作业历史
-sacct -j <jobid> --format=JobID%14,JobName%14,State%14,Elapsed,ExitCode -X
-
-# 提交（在 ~/LassoPep 下）
-sbatch scripts/job_train_improved.sh
-sbatch scripts/job_dock_propedia.sh
-sbatch --array=71-80%2 --mem=32G scripts/job_dock_array.sh   # 覆盖式重跑指定任务
-
-# 取消
-scancel <jobid>
-
-# 查看输出
-tail -40 prp49_<name>-<jobid>.out
-```
