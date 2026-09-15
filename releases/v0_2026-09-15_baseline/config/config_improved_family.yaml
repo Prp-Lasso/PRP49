@@ -1,0 +1,51 @@
+# Route B: FAMILY-grouped CV - every test fold contains unseen lasso families
+# 62% of positives sit in multi-member families (RES-701 x10, Anantin x10,
+# Capistruin x13), so the old peptide-grouped CV could have leaked family identity.
+model:
+  esm_model: ../esm2_35M_hf
+  lassoesm_model: ../LassoESM_hf
+  h_dim: 256
+  n_heads: 3
+  k: 2
+  dropout: 0.3
+  ban_dropout: 0.3
+  freeze_esm: false
+  lassoesm_unfreeze: 1
+  dual_head: false
+
+data:
+  pairs_csv: ../mvp_cpu/train_pairs_family.csv
+  align_labels_json: ../mvp_cpu/contacts/contacts.json
+  topo_csv: null
+  max_len: 1024
+  neg_pos_ratio: null
+  group_col: family_id        # <- the only change vs config_improved_grouped.yaml
+
+train:
+  batch_size: 16
+  epochs: 20
+  lr: 0.0002
+  weight_decay: 0.0001
+  patience: 6
+  seed: 42
+  num_seeds: 1
+  align_loss_weight: 0.1
+  align_loss_only_annotated: true
+  rank_loss_weight: 0.3
+  label_type: binary
+  init_ckpt: null
+  pu_weight: null
+
+eval:
+  cv_folds: 5
+  cv_mode: grouped
+  ablation_csv: ../mvp_cpu/ablation_set.csv
+
+scan:
+  peptides_csv: ../mvp_cpu/scan_peptides_ext.csv
+  targets_fasta: ../mvp_cpu/scan_targets.fasta
+  output: ../results/scan_matrix.csv
+
+paths:
+  output_dir: ./runs_family
+  checkpoint_dir: ./runs_family/checkpoints

@@ -1,0 +1,8 @@
+{
+  "tag": "v0_2026-09-15_baseline",
+  "created": "2026-09-15T14:10:57",
+  "cluster_path": "~/LassoPep/PRP49/runs_improved_grouped/checkpoints",
+  "listing": "total 13428481\ndrwxrwxr-x 2 clswxl-ccmbi1 clswxl-ccmbi1       4096 2026-09-13_01:40 .\ndrwxrwxr-x 3 clswxl-ccmbi1 clswxl-ccmbi1       4096 2026-09-13_01:42 ..\n-rw-rw-r-- 1 clswxl-ccmbi1 clswxl-ccmbi1 2750122845 2026-09-11_23:54 fold0_best.pt\n-rw-rw-r-- 1 clswxl-ccmbi1 clswxl-ccmbi1 2750122845 2026-09-12_04:30 fold1_best.pt\n-rw-rw-r-- 1 clswxl-ccmbi1 clswxl-ccmbi1 2750122845 2026-09-12_10:55 fold2_best.pt\n-rw-rw-r-- 1 clswxl-ccmbi1 clswxl-ccmbi1 2750122845 2026-09-12_19:21 fold3_best.pt\n-rw-rw-r-- 1 clswxl-ccmbi1 clswxl-ccmbi1 2750122845 2026-09-13_01:40 fold4_best.pt",
+  "fold0_md5": "d0c8bcd8c6a51cab2f138ef5a4eda057",
+  "note": "Baseline release: current working screening model. Peptide-grouped CV 0.8333, family-grouped CV 0.8142 (no family leakage), frozen validation 3/3 positives top-20% and 2/2 negatives controlled. Weights stay on the cluster."
+}

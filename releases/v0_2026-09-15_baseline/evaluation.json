@@ -1,0 +1,36 @@
+{
+  "n_rows": 121,
+  "rank_column": "final_rank",
+  "positives": {
+    "RES-701-3xEDNRB": {
+      "rank": 11,
+      "pct": 9.1,
+      "in_top20": true
+    },
+    "RES-701-1xEDNRB": {
+      "rank": 10,
+      "pct": 8.3,
+      "in_top20": true
+    },
+    "AnantinxNPR1": {
+      "rank": 20,
+      "pct": 16.5,
+      "in_top20": true
+    }
+  },
+  "negatives": {
+    "MccJ25xITGAV": {
+      "rank": 68,
+      "pct": 56.2,
+      "controlled": true
+    },
+    "MccJ25xITGB3": {
+      "rank": 69,
+      "pct": 57.0,
+      "controlled": true
+    }
+  },
+  "positives_top20": "3/3",
+  "negatives_controlled": "2/2",
+  "dock_coverage_pct": 90.9
+}

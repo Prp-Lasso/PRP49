@@ -1,0 +1,9 @@
+{
+  "peptide_grouped_auc": 0.8333,
+  "peptide_grouped_std": 0.012,
+  "family_grouped_auc": 0.8142,
+  "family_grouped_std": 0.043,
+  "target_grouped_auc": 0.6312,
+  "cross_domain_auc_single": 0.47,
+  "cross_domain_auc_multitask": 0.64
+}
