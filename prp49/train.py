@@ -240,12 +240,23 @@ def run_cv(cfg, device):
         sc, _ = predict(model, te_loader, device)
         auc, ap = evaluate_scores(sc, all_labels[eval_te], cfg.train.label_type)
         fold_metrics.append(dict(auc=float(auc), ap=float(ap)))
-        all_scores[te] = sc
+        # sc has len(eval_te) when propagated rows were excluded - must scatter with
+        # the SAME index, otherwise numpy raises a shape mismatch (this crashed the
+        # first propagation run at the end of fold 0).
+        all_scores[eval_te] = sc
         m1, m2 = ('Spearman', 'RMSE') if cfg.train.label_type == 'energy' else ('AUC', 'AP')
         v2 = -ap if cfg.train.label_type == 'energy' else ap
         print(f'fold {fold}: {m1} {auc:.3f} {m2} {v2:.3f}', flush=True)
 
-    overall_auc, overall_ap = evaluate_scores(all_scores, all_labels, cfg.train.label_type)
+    # Propagated rows are excluded from evaluation, so they never receive a score
+    # and would sit at their initial 0.0 - the overall metric must use the same
+    # subset, otherwise it is computed partly on placeholder values.
+    if 'propagated' in df.columns:
+        eval_mask = ~df['propagated'].fillna(False).astype(bool).values
+    else:
+        eval_mask = np.ones(len(df), dtype=bool)
+    overall_auc, overall_ap = evaluate_scores(all_scores[eval_mask], all_labels[eval_mask],
+                                              cfg.train.label_type)
     summary = dict(
         folds=fold_metrics,
         auc_mean=float(np.mean([m['auc'] for m in fold_metrics])),
