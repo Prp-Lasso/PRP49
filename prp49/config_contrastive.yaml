@@ -1,0 +1,60 @@
+# PRP49 route C downstream fine-tune: contrastively pretrained peptide encoder.
+#
+# This file is byte-for-byte config_improved_grouped.yaml EXCEPT for
+# `lassoesm_model`, which points at the encoder produced by route C
+# (prp49/pretrain_contrastive.py). Keeping every other knob identical is the
+# whole point: the only variable between this run and the 0.8142 baseline is
+# the encoder weights, so any CV difference is attributable to route C.
+#
+# Protocol notes (unchanged from the baseline):
+#   cv_mode: grouped      -> group by peptide, no peptide in both train and test
+#   neg_pos_ratio: null   -> use the hard negatives as provided
+#   align/rank losses     -> the I1+I2+I5 set that produced 0.8145 / 0.8333
+
+model:
+  esm_model: ../esm2_35M_hf
+  lassoesm_model: ../runs_contrastive/encoder   # <-- route C output (HF format)
+  h_dim: 256
+  n_heads: 3
+  k: 2
+  dropout: 0.3
+  ban_dropout: 0.3
+  freeze_esm: false
+  lassoesm_unfreeze: 1
+  dual_head: false
+
+data:
+  pairs_csv: ../mvp_cpu/train_pairs_hard.csv
+  align_labels_json: ../mvp_cpu/contacts/contacts.json
+  max_len: 1024
+  neg_pos_ratio: null
+  group_col: pep_seq
+
+train:
+  batch_size: 16
+  epochs: 100
+  lr: 0.0002
+  weight_decay: 0.0001
+  patience: 20
+  seed: 42
+  num_seeds: 3
+  align_loss_weight: 0.1
+  align_loss_only_annotated: true
+  rank_loss_weight: 0.3
+  init_ckpt: null
+  pu_weight: null
+  label_type: binary
+
+eval:
+  cv_folds: 5
+  cv_mode: grouped
+  ablation_csv: ../mvp_cpu/ablation_set.csv
+
+scan:
+  peptides_csv: ../mvp_cpu/scan_peptides_ext.csv
+  targets_fasta: ../mvp_cpu/scan_targets.fasta
+  output: ../results/scan_matrix_contrastive.csv
+
+paths:
+  output_dir: ./runs_contrastive_ft
+  checkpoint_dir: ./runs_contrastive_ft/checkpoints

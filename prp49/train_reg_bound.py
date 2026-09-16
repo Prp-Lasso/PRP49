@@ -68,7 +68,17 @@ def main():
     ap.add_argument('--bound_hi', type=float, default=13.0)
     ap.add_argument('--huber_delta', type=float, default=0.5)
     ap.add_argument('--base_head', action='store_true')
+    ap.add_argument('--fold', type=int, default=-1,
+                    help='run a single CV fold (0-based); -1 runs all folds. '
+                         'Use with --array so five folds run in parallel: one fold took '
+                         '7 h here, so the serial 5-fold run needs 35 h and timed out at 16 h.')
     args = ap.parse_args()
+
+    # A parallel array would have every fold overwrite the same --out file, so a
+    # single-fold run gets its own JSON (merged afterwards by scratch/merge_reg_folds.py).
+    if args.fold >= 0:
+        base, ext = os.path.splitext(args.out)
+        args.out = f'{base}_fold{args.fold}{ext}'
 
     cfg = Config.from_yaml(args.config)
     cfg._base_dir = os.path.dirname(os.path.abspath(args.config))
@@ -89,6 +99,8 @@ def main():
     results = []
 
     for fi, te_groups in enumerate(folds):
+        if args.fold >= 0 and fi != args.fold:
+            continue
         tr = df[~df.prot_id.isin(te_groups)]
         te = df[df.prot_id.isin(te_groups)]
         if len(tr) < 50 or len(te) < 10:
