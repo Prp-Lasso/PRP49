@@ -1,0 +1,7 @@
+peptide_id,target_id,pdb_id,human_counterpart
+P1_MicrocinJ25,BACT_6N60_subunit_beta,6N60,POLR2A
+P2_Capistruin,BACT_6N61_subunit_beta,6N61,POLR2A
+P3_Lassomycin,BACT_8IBO_ClpC/mecB,8IBO,CLPB
+P4_Lassomycin,BACT_8IBP_ClpC/mecB,8IBP,CLPB
+P1_MicrocinJ25,BACT_4CU4_FERRICHROME-IRON_R,4CU4,FhuA(uptake)
+P5_RES7013,BACT_9KDF_endothelin_recepto,9KDF,EDNRB
