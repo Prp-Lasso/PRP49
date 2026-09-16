@@ -1,0 +1,35 @@
+# RMSE-constrained affinity regression (scheme A: full data, bounded + decomposed)
+model:
+  esm_model: ../esm2_35M_hf
+  lassoesm_model: ../LassoESM_hf
+  h_dim: 256
+  n_heads: 3
+  k: 2
+  dropout: 0.3
+  ban_dropout: 0.3
+  freeze_esm: false
+  lassoesm_unfreeze: 1
+
+data:
+  pairs_csv: ../mvp_cpu/affinity_pairs.csv
+  energy_col: energy            # pAffinity = -log10(M)
+  align_labels_json: null
+  max_len: 768
+  group_col: prot_id
+
+train:
+  batch_size: 12
+  epochs: 60
+  lr: 0.0001                    # halved: the previous 2e-4 run diverged
+  weight_decay: 0.0001
+  patience: 10
+  seed: 42
+  label_type: energy
+
+eval:
+  cv_folds: 5
+  cv_mode: grouped
+
+paths:
+  output_dir: ./runs_reg_bound
+  checkpoint_dir: ./runs_reg_bound/checkpoints

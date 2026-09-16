@@ -1,0 +1,52 @@
+# Route A: family-aware label propagation (soft labels) on sequence-keyed targets
+# positives 352 -> 759 (253 at 0.9, 56 at 0.7, 98 at 0.55 identity tiers).
+# Evaluation excludes every propagated row, so the score measures the model, not
+# the propagation rule. CV groups by family.
+model:
+  esm_model: ../esm2_35M_hf
+  lassoesm_model: ../LassoESM_hf
+  h_dim: 256
+  n_heads: 3
+  k: 2
+  dropout: 0.3
+  ban_dropout: 0.3
+  freeze_esm: false
+  lassoesm_unfreeze: 1
+  dual_head: false
+
+data:
+  pairs_csv: ../mvp_cpu/train_pairs_prop2.csv
+  align_labels_json: ../mvp_cpu/contacts/contacts.json
+  topo_csv: null
+  max_len: 1024
+  neg_pos_ratio: null
+  group_col: family_id
+
+train:
+  batch_size: 16
+  epochs: 20
+  lr: 0.0002
+  weight_decay: 0.0001
+  patience: 6
+  seed: 42
+  num_seeds: 1
+  align_loss_weight: 0.1
+  align_loss_only_annotated: true
+  rank_loss_weight: 0.3
+  label_type: binary
+  init_ckpt: null
+  pu_weight: null
+
+eval:
+  cv_folds: 5
+  cv_mode: grouped
+  ablation_csv: ../mvp_cpu/ablation_set.csv
+
+scan:
+  peptides_csv: ../mvp_cpu/scan_peptides_ext.csv
+  targets_fasta: ../mvp_cpu/scan_targets.fasta
+  output: ../results/scan_matrix.csv
+
+paths:
+  output_dir: ./runs_prop
+  checkpoint_dir: ./runs_prop/checkpoints

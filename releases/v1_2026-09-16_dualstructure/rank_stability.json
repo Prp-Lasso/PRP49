@@ -1,0 +1,32 @@
+{
+  "n": 143,
+  "stable_top20": 17,
+  "stable_top30": 23,
+  "ever_top20": 42,
+  "volatile": 53,
+  "robust": [
+    "MccJ25xPOLR2A",
+    "UbonodinxPOLR2A",
+    "Capi-var1xPOLR2A",
+    "CapistruinxPOLR2A",
+    "AnantinxPOLR2A",
+    "RES-701-3xPOLR2A",
+    "AnantinxEDNRB",
+    "RES-701-1xPOLR2A",
+    "UbonodinxEDNRB",
+    "UbonodinxNPR1",
+    "UbonodinxCLPB",
+    "RES-701-3xNPR1",
+    "RES-701-3xCLPB",
+    "RES-701-1xCLPB",
+    "AnantinxNPR1",
+    "MccJ25xCLPB",
+    "AnantinxCLPB"
+  ],
+  "protocol_scorecard": {
+    "P0_exp_only": "positives 3/3, negatives 2/2",
+    "P1_worst_of_two": "positives 1/3, negatives 0/2",
+    "P2_trust_weighted": "positives 3/3, negatives 0/2"
+  },
+  "verdict": "exp-only remains best on the 5 validation points, but the two protocols are statistically indistinguishable at n=5; the conservative worst-of-two rule is demonstrably harmful because the EDNRB AlphaFold model sits 8.5 kcal/mol above its crystal counterpart"
+}

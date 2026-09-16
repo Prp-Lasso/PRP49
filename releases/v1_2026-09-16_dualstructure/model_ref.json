@@ -1,0 +1,8 @@
+{
+  "tag": "v1_2026-09-16_dualstructure",
+  "created": "2026-09-16T09:30:44",
+  "cluster_path": "~/LassoPep/PRP49/runs_improved_grouped/checkpoints",
+  "fold0_md5": "d0c8bcd8c6a51cab2f138ef5a4eda057",
+  "unchanged_from_v0": true,
+  "reason": "route A (family label propagation) scored 0.7481 +- 0.0506 on family-grouped CV, below the 0.8142 baseline, so it was rejected; no other candidate model cleared the bar, so v1 ships the same weights as v0 with a materially better-described shortlist"
+}
