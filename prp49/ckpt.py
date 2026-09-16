@@ -59,7 +59,18 @@ def maybe_resume(ckpt_dir, fold, model, optimizer=None, device='cuda', verbose=T
             print(f'  [resume] fold {fold}: cannot read {latest} ({exc}); starting fresh',
                   flush=True)
         return 0, -1.0
-    model.load_state_dict(ck['state_dict'])
+    try:
+        model.load_state_dict(ck['state_dict'])
+    except RuntimeError as exc:
+        # Architecture mismatch (e.g. scheme C without base_head resuming a
+        # scheme-A checkpoint, because several runs shared one checkpoint dir).
+        # Refuse to load rather than crash: start this fold from scratch.
+        if verbose:
+            keys = str(exc).splitlines()
+            print(f'  [resume] fold {fold}: checkpoint is incompatible with this model '
+                  f'({keys[0] if keys else exc}) -> starting fresh. '
+                  f'Give each configuration its own checkpoint_dir.', flush=True)
+        return 0, -1.0
     if optimizer is not None and ck.get('optimizer') is not None:
         try:
             optimizer.load_state_dict(ck['optimizer'])

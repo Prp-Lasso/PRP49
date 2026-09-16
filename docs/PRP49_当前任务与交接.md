@@ -235,6 +235,8 @@ print(out); cli.close()
 | 31 | **内联 `python -c "..."` 嵌套引号** | 多次因 PowerShell 引号转义导致语法错误、甚至**整个命令块未执行**（config 修改静默失败）| 一律改为**写脚本文件再执行**，不用内联多行命令 |
 | 32 | **上传脚本前未本地试跑** | 变量名 typo（`ex_p` 应为 `exp_p`）在服务器上跑到第 78 行才报错；CRLF 也在上传后才暴露 | **任何上传的脚本先在本机跑通**（用本机镜像数据）；配 `scratch/test_*_locally.py` + `preflight.py` |
 | 33 | **PyMOL 路线重复踩坑** | ① 该 conda 环境是 **Python 2**（f-string 语法错误，坑 #21 已记过一次）② 许可证 **2024-05 已过期** | 结构叠合改用**纯 Python3 + numpy**（`map_box_to_af_py3.py`），不再依赖 PyMOL |
+| 34 | **多配置共用 checkpoint 目录 → resume 到别的配置的权重** | RMSE 三方案 A/B/C 都写 `runs_reg_bound/checkpoints`；方案 C（**无** base_head）启动 fold 1 时 `maybe_resume` 读到方案 B（**有** base_head）的权重 → `Unexpected key(s): base_fc/base_out` → **CRASH**（6.6h 后，丢 fold 1-4）。**这是修 #30 时引入的新问题**：加 resume 前只写不读，不会崩 | ① `ckpt.py` 捕获 `RuntimeError` 并**拒绝加载不兼容检查点**（打印提示后从零开始）② **每个配置独立 `checkpoint_dir`**（作业脚本内 `sed` 生成 `config_regb{A,B,C}.yaml`）|
+| 35 | **基于部分折下结论** | 路线 A 前 2 折均为 0.726 → 我判断"明显有害"并建议提前终止；**实际 5 折均值 0.7481**（后两折 0.805/0.807），与基线 0.8142 仅差 0.066 | **至少完成 3 折或全部折再判断**；折间标准差可达 0.05，2 折远不足以定位均值（用户当时要求"等完全完成再做结论"，判断正确）|
 
 ---
 
