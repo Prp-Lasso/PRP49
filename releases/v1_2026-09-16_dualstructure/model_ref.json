@@ -4,5 +4,10 @@
   "cluster_path": "~/LassoPep/PRP49/runs_improved_grouped/checkpoints",
   "fold0_md5": "d0c8bcd8c6a51cab2f138ef5a4eda057",
   "unchanged_from_v0": true,
-  "reason": "route A (family label propagation) scored 0.7481 +- 0.0506 on family-grouped CV, below the 0.8142 baseline, so it was rejected; no other candidate model cleared the bar, so v1 ships the same weights as v0 with a materially better-described shortlist"
+  "reason": "route A (family label propagation) scored 0.7481 +- 0.0506 on family-grouped CV, below the 0.8142 baseline, so it was rejected; no other candidate model cleared the bar, so v1 ships the same weights as v0 with a materially better-described shortlist",
+  "cv_protocol": "grouped by peptide (held-out peptides; no peptide in both train and test)",
+  "cv_auc": 0.8333,
+  "cv_std": 0.0135,
+  "family_grouped_auc": 0.8142,
+  "protocol_note": "This checkpoint is runs_improved_grouped. Its 0.8333 belongs to the grouped-by-peptide protocol. The family-grouped figure 0.8142 comes from a DIFFERENT run (runs_family) and must not be quoted for these weights."
 }
