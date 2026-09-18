@@ -50,7 +50,44 @@ protocols) · `candidates_single_structure.csv` (the earlier single-source list)
 `mutation_advice.csv` · `ring_tradeoff.csv` · `tail_modification_advice.csv` ·
 `verify_real_complexes.csv` · `routeC_verdict.json` · `assets/` · `config/` · 4 documents.
 
-## 4. Honest limitations
+## 4. Zero-shot probe on three unseen targets (2026-09-18)
+
+**Question**: the model has never seen GUK1 (Q16774), SSX1 (Q16384) or EXOSC1 (Q9Y3B2) —
+they appear in none of the 11 scan targets, the 39-target drug panel, or the 564 affinity
+targets. Does it emit any usable signal on them?
+
+**Setup**: 13 scan peptides x 3 targets, scored with the released fold-0 checkpoint.
+
+**Result — the scores do not depend on the target at all:**
+
+```
+variance decomposition
+  between-peptide  99.7%  ########################
+  between-target    0.2%  .
+  residual          0.1%
+
+global range        -2.611 .. 1.227   (nothing above 5)
+median spread of one peptide across the 3 targets: 0.132
+e.g. Siamycin-I  -2.581 / -2.611 / -2.588   (spread 0.029)
+     PB1m7       -2.483 / -2.517 / -2.491   (spread 0.033)
+reference: genuine complex MccJ25 x RNAP scored 9.902
+```
+
+**Verdict: NO USABLE SIGNAL.** The model is not reading these targets; it emits a
+peptide-level constant. This sharpens the picture from the real-complex check (where
+peptide identity already explained 62.8% of the variance) — on truly unseen targets the
+target contributes essentially nothing.
+
+**Operational consequence (honest scope statement):**
+> The released model is a *screening* tool **for targets it has seen**. It is not a
+> discovery tool for new targets. Any use on a novel protein requires new supervision,
+> not zero-shot inference.
+
+Data: `results/zeroshot_three_targets.csv`. Related: `docs/target_analysis_GUK1_SSX1_EXOSC1.md`
+(these three are full human proteins, not peptides, and all are intracellular — delivery,
+not prediction, is the binding constraint for them).
+
+## 5. Honest limitations
 1. Affinity regression RMSE 1.47–1.53 — **not usable** (threshold <1.0)
 2. Absolute model scores are peptide-identity dominated (62.8% of variance); temperature
    scaling does not transfer out of domain

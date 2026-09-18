@@ -8,5 +8,15 @@
   "cv_auc": 0.8333,
   "cv_std": 0.0135,
   "family_grouped_auc": 0.8142,
-  "reason": "No candidate model exceeded the grouped baseline; v2 selected for deliverable completeness (structure DB, engineering tables, methodology)."
+  "reason": "No candidate model exceeded the grouped baseline; v2 selected for deliverable completeness (structure DB, engineering tables, methodology).",
+  "zero_shot_new_targets": {
+    "targets": [
+      "GUK1_Q16774",
+      "SSX1_Q16384",
+      "EXOSC1_Q9Y3B2"
+    ],
+    "between_target_variance_pct": 0.2,
+    "between_peptide_variance_pct": 99.7,
+    "verdict": "no usable signal - model does not read unseen targets"
+  }
 }
