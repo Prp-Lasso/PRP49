@@ -1,0 +1,10 @@
+peptide,target,evidence_type,source,confidence,note
+# Fill one row per pair you consider supported. Delete these comment lines.
+# peptide          : the lasso peptide name as used in this project, e.g. MccJ25
+# target           : the target name as used here, e.g. POLR2A / EGFR / GPRC5A
+# evidence_type    : one of  experiment | literature | docking | prediction | assay
+# source           : your name + date, or a PMID/DOI/PDB id
+# confidence       : high | medium | low   (high = you would bet on it)
+# note             : anything the reader must know (construct, condition, caveat)
+# example:
+# MccJ25,POLR2A,literature,PMID:31201273,high,bacterial RNAP secondary channel
