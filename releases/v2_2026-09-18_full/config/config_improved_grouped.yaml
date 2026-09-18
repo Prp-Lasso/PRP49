@@ -1,0 +1,48 @@
+# PRP49 improved run with LEAKAGE-SAFE grouped CV (group by peptide sequence)
+model:
+  esm_model: ../esm2_35M_hf
+  lassoesm_model: ../LassoESM_hf
+  h_dim: 256
+  n_heads: 3
+  k: 2
+  dropout: 0.3
+  ban_dropout: 0.3
+  freeze_esm: false
+  lassoesm_unfreeze: 1
+  dual_head: false
+
+data:
+  pairs_csv: ../mvp_cpu/train_pairs_hard.csv
+  align_labels_json: ../mvp_cpu/contacts/contacts.json
+  max_len: 1024
+  neg_pos_ratio: null
+  group_col: pep_seq          # ← group by peptide: no peptide appears in both train and test
+
+train:
+  batch_size: 16
+  epochs: 100
+  lr: 0.0002
+  weight_decay: 0.0001
+  patience: 20
+  seed: 42
+  num_seeds: 3
+  align_loss_weight: 0.1
+  align_loss_only_annotated: true
+  rank_loss_weight: 0.3
+  init_ckpt: null
+  pu_weight: null
+  label_type: binary
+
+eval:
+  cv_folds: 5
+  cv_mode: grouped          # ← leakage-safe protocol
+  ablation_csv: ../mvp_cpu/ablation_set.csv
+
+scan:
+  peptides_csv: ../mvp_cpu/scan_peptides_ext.csv
+  targets_fasta: ../mvp_cpu/scan_targets.fasta
+  output: ../results/scan_matrix.csv
+
+paths:
+  output_dir: ./runs_improved_grouped
+  checkpoint_dir: ./runs_improved_grouped/checkpoints

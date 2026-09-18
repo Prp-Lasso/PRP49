@@ -1,0 +1,55 @@
+{
+  "protocols": {
+    "P0_exp_only": {
+      "positives_top20": "3/3",
+      "negatives_controlled": "2/2",
+      "ranks": {
+        "RES-701-3xEDNRB": 13,
+        "RES-701-1xEDNRB": 12,
+        "AnantinxNPR1": 23,
+        "MccJ25xITGAV": 77,
+        "MccJ25xITGB3": 79
+      },
+      "dock_coverage_pct": 92.3
+    },
+    "P1_worst_of_two": {
+      "positives_top20": "1/3",
+      "negatives_controlled": "0/2",
+      "ranks": {
+        "RES-701-3xEDNRB": 61,
+        "RES-701-1xEDNRB": 59,
+        "AnantinxNPR1": 12,
+        "MccJ25xITGAV": 39,
+        "MccJ25xITGB3": 41
+      },
+      "dock_coverage_pct": 92.3
+    },
+    "P2_trust_weighted": {
+      "positives_top20": "3/3",
+      "negatives_controlled": "0/2",
+      "ranks": {
+        "RES-701-3xEDNRB": 15,
+        "RES-701-1xEDNRB": 14,
+        "AnantinxNPR1": 20,
+        "MccJ25xITGAV": 56,
+        "MccJ25xITGB3": 57
+      },
+      "dock_coverage_pct": 92.3
+    }
+  },
+  "trust_exp": {
+    "EDNRB": 0.85,
+    "POLR2A": 0.8,
+    "PPIA": 0.9,
+    "FKBP1A": 0.9,
+    "C3": 0.85,
+    "MDM2": 0.65,
+    "PLXNB1": 0.65,
+    "CLPB": 0.5,
+    "NPR1": 0.5
+  },
+  "fusion": {
+    "w_binding": 0.4,
+    "w_dock": 0.6
+  }
+}

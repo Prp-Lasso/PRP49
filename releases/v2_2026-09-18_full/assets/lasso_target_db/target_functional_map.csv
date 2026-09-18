@@ -1,0 +1,14 @@
+human_target,counterpart,basis,confidence
+POLR2A,DNA-directed RNA polymerase subunit beta-prime (rpoC),MccJ25 and capistruin bind the RNAP secondary channel; the channel is conserved between bacterial and human RNAP despite <15% sequence identity,high
+POLR2A,DNA-directed RNA polymerase subunit beta (rpoB),"rifampicin pocket, adjacent to the secondary channel",medium
+CLPB,ClpB / ClpC1 (AAA+ unfoldase),lassomycin kills M. tuberculosis by binding ClpC1; CLPB is the human mitochondrial orthologue of the same AAA+ clade,high
+CLPB,ClpP (caseinolytic protease),ADEP/acyldepsipeptide class binds ClpP; CLPB is the unfoldase partner,medium
+PPIA,peptidyl-prolyl isomerase (bacterial cyclophilin-like),cyclophilin domain PF00160 found in 2 Propedia receptors (weight 0.94),high
+FKBP1A,FKBP-type PPIase (bacterial),FKBP domain PF00254 is widespread in bacteria,medium
+NPR1,guanylate cyclase (bacterial),NPR1 carries an adenylate/guanylate cyclase catalytic domain PF00211,medium
+C3,alpha-2-macroglobulin (bacterial),C3 shares 11 of 12 Pfam domains with a Propedia receptor (weight 0.92),high
+MDM2,SWIB/MDM2 domain protein,MDM2 domain PF02201 found in 13 Propedia receptors,medium
+ITGAV,integrin alpha (metazoan only),no bacterial counterpart; integrins are metazoan-specific,none
+ITGB3,integrin beta (metazoan only),no bacterial counterpart; integrins are metazoan-specific,none
+EDNRB,GPCR (eukaryotic only),7TM GPCRs do not exist in bacteria; 74 weak single-domain hits are not homologs,none
+PLXNB1,plexin/SEMA domain (metazoan only),plexin domains are metazoan-specific,none

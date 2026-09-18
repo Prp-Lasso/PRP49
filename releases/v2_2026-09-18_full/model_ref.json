@@ -1,0 +1,12 @@
+{
+  "tag": "v2_2026-09-18_full",
+  "created": "2026-09-18T08:00:43",
+  "cluster_path": "~/LassoPep/PRP49/runs_improved_grouped/checkpoints",
+  "fold0_md5": "d0c8bcd8c6a51cab2f138ef5a4eda057",
+  "unchanged_from_v0": true,
+  "cv_protocol": "grouped by peptide",
+  "cv_auc": 0.8333,
+  "cv_std": 0.0135,
+  "family_grouped_auc": 0.8142,
+  "reason": "No candidate model exceeded the grouped baseline; v2 selected for deliverable completeness (structure DB, engineering tables, methodology)."
+}

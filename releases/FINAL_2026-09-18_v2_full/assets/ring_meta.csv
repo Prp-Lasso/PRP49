@@ -1,0 +1,34 @@
+variant_id,peptide_id,target_id,wt_seq,variant_seq,ring_wt,ring_new,delta,topology_source,stability_note
+MccJ25_ring8to7,MccJ25,POLR2A,GGAGHVPEYFVGIGTPISFYG,GGAGHVPYFVGIGTPISFYG,8,7,-1,"literature: lactam Gly1-E8, tail Y9-G21 threads; His5 H-bonds tail",7-9 residue ring: threading-competent
+MccJ25_ring8to9,MccJ25,POLR2A,GGAGHVPEYFVGIGTPISFYG,GGAGHVPEGYFVGIGTPISFYG,8,9,1,"literature: lactam Gly1-E8, tail Y9-G21 threads; His5 H-bonds tail",7-9 residue ring: threading-competent
+MccJ25_ring8to10,MccJ25,POLR2A,GGAGHVPEYFVGIGTPISFYG,GGAGHVPEGGYFVGIGTPISFYG,8,10,2,"literature: lactam Gly1-E8, tail Y9-G21 threads; His5 H-bonds tail",outside the 7-9 window: threading likely lost
+Ubonodin_ring8to7,Ubonodin,POLR2A,GGDGSIAEYFNRPMHIHDWQIMDSGYYG,GGDGSIAYFNRPMHIHDWQIMDSGYYG,8,7,-1,assumed default,7-9 residue ring: threading-competent
+Ubonodin_ring8to9,Ubonodin,POLR2A,GGDGSIAEYFNRPMHIHDWQIMDSGYYG,GGDGSIAEGYFNRPMHIHDWQIMDSGYYG,8,9,1,assumed default,7-9 residue ring: threading-competent
+Ubonodin_ring8to10,Ubonodin,POLR2A,GGDGSIAEYFNRPMHIHDWQIMDSGYYG,GGDGSIAEGGYFNRPMHIHDWQIMDSGYYG,8,10,2,assumed default,outside the 7-9 window: threading likely lost
+Capistruin_ring9to8,Capistruin,POLR2A,GTPGFQTPDARVISRFGFN,GTPGFQTPARVISRFGFN,9,8,-1,"literature: lactam Gly1-D9, tail R10-N19",7-9 residue ring: threading-competent
+Capistruin_ring9to10,Capistruin,POLR2A,GTPGFQTPDARVISRFGFN,GTPGFQTPDGARVISRFGFN,9,10,1,"literature: lactam Gly1-D9, tail R10-N19",outside the 7-9 window: threading likely lost
+Capistruin_ring9to11,Capistruin,POLR2A,GTPGFQTPDARVISRFGFN,GTPGFQTPDGGARVISRFGFN,9,11,2,"literature: lactam Gly1-D9, tail R10-N19",outside the 7-9 window: threading likely lost
+Anantin_ring8to7,Anantin,EDNRB,GFIGWGKDIFGHYGG,GFIGWGKIFGHYGG,8,7,-1,"PREDICTED structure (LassoPred+tleap, 8 loop-length models)",7-9 residue ring: threading-competent
+Anantin_ring8to9,Anantin,EDNRB,GFIGWGKDIFGHYGG,GFIGWGKDGIFGHYGG,8,9,1,"PREDICTED structure (LassoPred+tleap, 8 loop-length models)",7-9 residue ring: threading-competent
+Anantin_ring8to10,Anantin,EDNRB,GFIGWGKDIFGHYGG,GFIGWGKDGGIFGHYGG,8,10,2,"PREDICTED structure (LassoPred+tleap, 8 loop-length models)",outside the 7-9 window: threading likely lost
+RES-701-3_ring9to8,RES-701-3,POLR2A,GNWHGTSPDWFFNYYW,GNWHGTSPWFFNYYW,9,8,-1,literature: 9-residue ring (RES series),7-9 residue ring: threading-competent
+RES-701-3_ring9to10,RES-701-3,POLR2A,GNWHGTSPDWFFNYYW,GNWHGTSPDGWFFNYYW,9,10,1,literature: 9-residue ring (RES series),outside the 7-9 window: threading likely lost
+RES-701-3_ring9to11,RES-701-3,POLR2A,GNWHGTSPDWFFNYYW,GNWHGTSPDGGWFFNYYW,9,11,2,literature: 9-residue ring (RES series),outside the 7-9 window: threading likely lost
+RES-701-1_ring9to8,RES-701-1,EDNRB,GNWHGTAPDWFFNYYW,GNWHGTAPWFFNYYW,9,8,-1,literature: 9-residue ring (RES series),7-9 residue ring: threading-competent
+RES-701-1_ring9to10,RES-701-1,EDNRB,GNWHGTAPDWFFNYYW,GNWHGTAPDGWFFNYYW,9,10,1,literature: 9-residue ring (RES series),outside the 7-9 window: threading likely lost
+RES-701-1_ring9to11,RES-701-1,EDNRB,GNWHGTAPDWFFNYYW,GNWHGTAPDGGWFFNYYW,9,11,2,literature: 9-residue ring (RES series),outside the 7-9 window: threading likely lost
+Chaxapeptin_ring8to7,Chaxapeptin,POLR2A,GFGSKPLDSFGLNFF,GFGSKPLSFGLNFF,8,7,-1,assumed default,7-9 residue ring: threading-competent
+Chaxapeptin_ring8to9,Chaxapeptin,POLR2A,GFGSKPLDSFGLNFF,GFGSKPLDGSFGLNFF,8,9,1,assumed default,7-9 residue ring: threading-competent
+Chaxapeptin_ring8to10,Chaxapeptin,POLR2A,GFGSKPLDSFGLNFF,GFGSKPLDGGSFGLNFF,8,10,2,assumed default,outside the 7-9 window: threading likely lost
+Siamycin-I_ring8to7,Siamycin-I,POLR2A,CLGVGSCNDFAGCGYAIVCFW,CLGVGSCDFAGCGYAIVCFW,8,7,-1,assumed default (uncharacterised topology),7-9 residue ring: threading-competent
+Siamycin-I_ring8to9,Siamycin-I,POLR2A,CLGVGSCNDFAGCGYAIVCFW,CLGVGSCNGDFAGCGYAIVCFW,8,9,1,assumed default (uncharacterised topology),7-9 residue ring: threading-competent
+Siamycin-I_ring8to10,Siamycin-I,POLR2A,CLGVGSCNDFAGCGYAIVCFW,CLGVGSCNGGDFAGCGYAIVCFW,8,10,2,assumed default (uncharacterised topology),outside the 7-9 window: threading likely lost
+Lassomycin_ring8to7,Lassomycin,CLPB,GLRRLFANQLVGRRNI,GLRRLFAQLVGRRNI,8,7,-1,"literature: lactam Gly1-D8, tail Q9-X16",7-9 residue ring: threading-competent
+Lassomycin_ring8to9,Lassomycin,CLPB,GLRRLFANQLVGRRNI,GLRRLFANGQLVGRRNI,8,9,1,"literature: lactam Gly1-D8, tail Q9-X16",7-9 residue ring: threading-competent
+Lassomycin_ring8to10,Lassomycin,CLPB,GLRRLFANQLVGRRNI,GLRRLFANGGQLVGRRNI,8,10,2,"literature: lactam Gly1-D8, tail Q9-X16",outside the 7-9 window: threading likely lost
+Sphingopyxin-I_ring9to8,Sphingopyxin-I,EDNRB,GIEPLGPVDEDQGEHYLFAGGITADD,GIEPLGPVEDQGEHYLFAGGITADD,9,8,-1,assumed default,7-9 residue ring: threading-competent
+Sphingopyxin-I_ring9to10,Sphingopyxin-I,EDNRB,GIEPLGPVDEDQGEHYLFAGGITADD,GIEPLGPVDGEDQGEHYLFAGGITADD,9,10,1,assumed default,outside the 7-9 window: threading likely lost
+Sphingopyxin-I_ring9to11,Sphingopyxin-I,EDNRB,GIEPLGPVDEDQGEHYLFAGGITADD,GIEPLGPVDGGEDQGEHYLFAGGITADD,9,11,2,assumed default,outside the 7-9 window: threading likely lost
+Lariocidin_ring8to7,Lariocidin,PPIA,SKKSKPGDGKFGRGVKRG,SKKSKPGGKFGRGVKRG,8,7,-1,assumed default,7-9 residue ring: threading-competent
+Lariocidin_ring8to9,Lariocidin,PPIA,SKKSKPGDGKFGRGVKRG,SKKSKPGDGGKFGRGVKRG,8,9,1,assumed default,7-9 residue ring: threading-competent
+Lariocidin_ring8to10,Lariocidin,PPIA,SKKSKPGDGKFGRGVKRG,SKKSKPGDGGGKFGRGVKRG,8,10,2,assumed default,outside the 7-9 window: threading likely lost

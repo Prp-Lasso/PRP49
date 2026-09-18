@@ -1,0 +1,34 @@
+id,target_id,logit,variant_id,peptide_id,ring_wt,ring_new,ring_delta,stability_note,wt_logit,score_delta
+MccJ25_ring8to7,POLR2A,6.729150295257568,MccJ25_ring8to7,MccJ25,8,7,-1,7-9 residue ring: threading-competent,9.9024,-3.1732497047424317
+MccJ25_ring8to9,POLR2A,8.181720733642578,MccJ25_ring8to9,MccJ25,8,9,1,7-9 residue ring: threading-competent,9.9024,-1.720679266357422
+MccJ25_ring8to10,POLR2A,7.938742160797119,MccJ25_ring8to10,MccJ25,8,10,2,outside the 7-9 window: threading likely lost,9.9024,-1.963657839202881
+Ubonodin_ring8to7,POLR2A,4.765614986419678,Ubonodin_ring8to7,Ubonodin,8,7,-1,7-9 residue ring: threading-competent,4.9526,-0.1869850135803226
+Ubonodin_ring8to9,POLR2A,4.385303974151611,Ubonodin_ring8to9,Ubonodin,8,9,1,7-9 residue ring: threading-competent,4.9526,-0.567296025848389
+Ubonodin_ring8to10,POLR2A,4.363205432891846,Ubonodin_ring8to10,Ubonodin,8,10,2,outside the 7-9 window: threading likely lost,4.9526,-0.5893945671081546
+Capistruin_ring9to8,POLR2A,4.780422210693359,Capistruin_ring9to8,Capistruin,9,8,-1,7-9 residue ring: threading-competent,7.6199,-2.839477789306641
+Capistruin_ring9to10,POLR2A,6.516993999481201,Capistruin_ring9to10,Capistruin,9,10,1,outside the 7-9 window: threading likely lost,7.6199,-1.1029060005187992
+Capistruin_ring9to11,POLR2A,6.153067111968994,Capistruin_ring9to11,Capistruin,9,11,2,outside the 7-9 window: threading likely lost,7.6199,-1.4668328880310062
+RES-701-3_ring9to8,POLR2A,7.954666614532471,RES-701-3_ring9to8,RES-701-3,9,8,-1,7-9 residue ring: threading-competent,10.0923,-2.137633385467529
+RES-701-3_ring9to10,POLR2A,8.966950416564941,RES-701-3_ring9to10,RES-701-3,9,10,1,outside the 7-9 window: threading likely lost,10.0923,-1.1253495834350584
+RES-701-3_ring9to11,POLR2A,8.705451011657715,RES-701-3_ring9to11,RES-701-3,9,11,2,outside the 7-9 window: threading likely lost,10.0923,-1.386848988342285
+Chaxapeptin_ring8to7,POLR2A,2.909764051437378,Chaxapeptin_ring8to7,Chaxapeptin,8,7,-1,7-9 residue ring: threading-competent,1.8022,1.107564051437378
+Chaxapeptin_ring8to9,POLR2A,3.4237544536590576,Chaxapeptin_ring8to9,Chaxapeptin,8,9,1,7-9 residue ring: threading-competent,1.8022,1.6215544536590576
+Chaxapeptin_ring8to10,POLR2A,3.0587270259857178,Chaxapeptin_ring8to10,Chaxapeptin,8,10,2,outside the 7-9 window: threading likely lost,1.8022,1.2565270259857177
+Siamycin-I_ring8to7,POLR2A,2.022151470184326,Siamycin-I_ring8to7,Siamycin-I,8,7,-1,7-9 residue ring: threading-competent,1.8439,0.17825147018432608
+Siamycin-I_ring8to9,POLR2A,0.8329595923423767,Siamycin-I_ring8to9,Siamycin-I,8,9,1,7-9 residue ring: threading-competent,1.8439,-1.0109404076576234
+Siamycin-I_ring8to10,POLR2A,1.3601057529449463,Siamycin-I_ring8to10,Siamycin-I,8,10,2,outside the 7-9 window: threading likely lost,1.8439,-0.4837942470550538
+Anantin_ring8to7,EDNRB,2.7937276363372803,Anantin_ring8to7,Anantin,8,7,-1,7-9 residue ring: threading-competent,3.2845,-0.4907723636627197
+Anantin_ring8to9,EDNRB,3.513315200805664,Anantin_ring8to9,Anantin,8,9,1,7-9 residue ring: threading-competent,3.2845,0.2288152008056641
+Anantin_ring8to10,EDNRB,3.297180652618408,Anantin_ring8to10,Anantin,8,10,2,outside the 7-9 window: threading likely lost,3.2845,0.012680652618408228
+RES-701-1_ring9to8,EDNRB,3.229266881942749,RES-701-1_ring9to8,RES-701-1,9,8,-1,7-9 residue ring: threading-competent,4.0255,-0.796233118057251
+RES-701-1_ring9to10,EDNRB,3.581953763961792,RES-701-1_ring9to10,RES-701-1,9,10,1,outside the 7-9 window: threading likely lost,4.0255,-0.4435462360382081
+RES-701-1_ring9to11,EDNRB,3.3932526111602783,RES-701-1_ring9to11,RES-701-1,9,11,2,outside the 7-9 window: threading likely lost,4.0255,-0.6322473888397218
+Sphingopyxin-I_ring9to8,EDNRB,0.4735663831233978,Sphingopyxin-I_ring9to8,Sphingopyxin-I,9,8,-1,7-9 residue ring: threading-competent,0.6109,-0.13733361687660217
+Sphingopyxin-I_ring9to10,EDNRB,0.9501090049743652,Sphingopyxin-I_ring9to10,Sphingopyxin-I,9,10,1,outside the 7-9 window: threading likely lost,0.6109,0.33920900497436524
+Sphingopyxin-I_ring9to11,EDNRB,1.0949783325195312,Sphingopyxin-I_ring9to11,Sphingopyxin-I,9,11,2,outside the 7-9 window: threading likely lost,0.6109,0.48407833251953125
+Lassomycin_ring8to7,CLPB,-5.0628156661987305,Lassomycin_ring8to7,Lassomycin,8,7,-1,7-9 residue ring: threading-competent,-5.1498,0.08698433380126946
+Lassomycin_ring8to9,CLPB,-1.6616824865341189,Lassomycin_ring8to9,Lassomycin,8,9,1,7-9 residue ring: threading-competent,-5.1498,3.4881175134658813
+Lassomycin_ring8to10,CLPB,-2.4705162048339844,Lassomycin_ring8to10,Lassomycin,8,10,2,outside the 7-9 window: threading likely lost,-5.1498,2.6792837951660156
+Lariocidin_ring8to7,PPIA,0.6696500778198242,Lariocidin_ring8to7,Lariocidin,8,7,-1,7-9 residue ring: threading-competent,0.6043,0.06535007781982427
+Lariocidin_ring8to9,PPIA,0.5365206599235535,Lariocidin_ring8to9,Lariocidin,8,9,1,7-9 residue ring: threading-competent,0.6043,-0.06777934007644648
+Lariocidin_ring8to10,PPIA,0.5673415660858154,Lariocidin_ring8to10,Lariocidin,8,10,2,outside the 7-9 window: threading likely lost,0.6043,-0.03695843391418452

@@ -1,0 +1,44 @@
+# Multi-task training config: lasso (in-domain) + ordinary-peptide (auxiliary)
+model:
+  esm_model: ../esm2_35M_hf
+  lassoesm_model: ../LassoESM_hf
+  h_dim: 256
+  n_heads: 3
+  k: 2
+  dropout: 0.3
+  ban_dropout: 0.3
+  freeze_esm: false
+  lassoesm_unfreeze: 1
+  dual_head: false
+  use_topo: false
+
+data:
+  pairs_csv: ../mvp_cpu/train_pairs_hard.csv     # in-domain (lasso x human target)
+  align_labels_json: null
+  topo_csv: null
+  max_len: 768
+  neg_pos_ratio: null
+  group_col: pep_seq
+
+train:
+  batch_size: 8
+  epochs: 24
+  lr: 0.0002
+  weight_decay: 0.0001
+  patience: 6
+  seed: 42
+  num_seeds: 1
+  align_loss_weight: 0.0
+  rank_loss_weight: null
+  label_type: binary
+  init_ckpt: null
+  pu_weight: null
+
+eval:
+  cv_folds: 5
+  cv_mode: grouped
+  ablation_csv: null
+
+paths:
+  output_dir: ./runs_mtl
+  checkpoint_dir: ./runs_mtl/checkpoints
