@@ -167,6 +167,19 @@ tanh 约束**彻底解决发散**（6.855 → 1.5）；但**均未达实用门�
 - `high` 偏置的肽（RES-701-1 在 15 个靶排第一）**不应把每个"第一"当作独立候选**
 - 对接分缺失的行（`dock_score` 为 NaN）仅有模型分支撑，可信度更低
 
+### 4.5 外源证据（组员接口，待填）
+
+组员填完 `templates/teammate_evidence_template.csv` 后运行：
+```bash
+python scratch/merge_teammate_evidence.py <填好的.csv> \
+    --candidates results/candidates_screen50_within_target.csv \
+    --out results/candidates_merged.csv
+```
+合并后会新增 `ext_evidence` / `ext_source` / `ext_confidence` / `ext_note` 四列，
+并**报告未匹配行**（不会静默丢弃）。
+
+⏳ 待组员结果
+
 ### 4.6 🎯 最终精选 10 对（交付核心）
 
 **筛选漏斗**（完全可审计）：
@@ -218,19 +231,6 @@ tanh 约束**彻底解决发散**（6.855 → 1.5）；但**均未达实用门�
 | 已知靶上的 5 个文献对 | 3 个进入靶内前 5（MccJ25×POLR2A **第 1**）|
 | 成药靶上的最终 10 对 | 全部为**成药靶**，且经偏置过滤与双信号一致性检验 |
 | 说明 | 模型在**有实验证据的靶**上表现更好；成药靶候选属**待验证假设**，非已验证结论 |
-
-### 4.5 外源证据（组员接口，待填）
-
-组员填完 `templates/teammate_evidence_template.csv` 后运行：
-```bash
-python scratch/merge_teammate_evidence.py <填好的.csv> \
-    --candidates results/candidates_screen50_within_target.csv \
-    --out results/candidates_merged.csv
-```
-合并后会新增 `ext_evidence` / `ext_source` / `ext_confidence` / `ext_note` 四列，
-并**报告未匹配行**（不会静默丢弃）。
-
-⏳ 待组员结果
 
 ## 五、结构优化建议（交付物之二）
 
