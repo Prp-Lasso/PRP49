@@ -233,6 +233,33 @@ python scratch/merge_teammate_evidence.py <填好的.csv> \
 完整审计表（每一行都带排除理由）：`results/candidates_screen50_audited.csv`
 仅这 10 行：`results/final_candidates_top10.csv`
 
+
+**⚠️ 融合权重的稳健性（新增，见 `results/fusion_weight_sensitivity.csv`）**：
+
+0.40/0.60 的权重**无法从数据客观拟合** —— 可用的人靶文献对仅约 6 个，不足以确定 2 个参数，
+拟合只会过拟合。因此改为**敏感性分析**：对 `w_dock ∈ {0.4…0.8}` 重跑整套筛选，看每个候选
+是否稳定入选。
+
+| 候选对 | 入选权重数 | 稳健性 |
+|---|---|---|
+| Sphingopyxin-I × JAK2 | 5/5 | ✅ **稳健** |
+| Chaxapeptin × BCL2L1 | 5/5 | ✅ **稳健** |
+| RES-701-3 × AURKA | 5/5 | ✅ **稳健** |
+| RES-701-3 × VHL | 5/5 | ✅ **稳健** |
+| Sphingopyxin-I × ADORA2A | 4/5 | 🟡 敏感 |
+| Lassomycin × SRC | 4/5 | 🟡 敏感 |
+| RES-701-3 × EGFR | 4/5 | 🟡 敏感 |
+| Chaxapeptin × ESR1 | 4/5 | 🟡 敏感 |
+| Sphingopyxin-I × FURIN | 3/5 | 🟡 敏感 |
+| Chaxapeptin × CDK2 | 2/5 | 🔴 很敏感 |
+
+**读法**：**4 对在全部 5 种权重下都入选**（`Sphingopyxin-I×JAK2`、`RES-701-3×VHL`、
+`RES-701-3×AURKA`、`Chaxapeptin×BCL2L1`）—— 这些结论不依赖权重选择；其余 6 对是
+**权重依赖的**，其中最敏感的 `Chaxapeptin×CDK2` 只在 2/5 权重下出现。
+
+> **注意**：`SRC × Lassomycin` 是**偏置最低（low）**的候选，但它同时**对权重敏感（4/5）**。
+> 两个属性必须一起报告，不能只说"最可信"。
+
 ### 4.7 与已知对的对照（本项目的方法学意义）
 
 | 层面 | 结果 |
