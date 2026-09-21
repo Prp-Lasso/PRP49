@@ -28,17 +28,22 @@ BEAD = 8.0
 
 
 def cc(t):
-    """colour at fractional chain position t (0 = N-terminus, 1 = C-terminus)"""
-    return to_hex(cm.viridis(float(np.clip(t, 0.0, 1.0))))
+    """colour at fractional chain position t (0 = N-terminus, 1 = C-terminus)
+
+    The ramp is mapped onto viridis [0, 0.88] rather than [0, 1]: the top of viridis is a
+    very light yellow, and the bead numbers are plain white, which would be unreadable
+    there. Stopping at 0.88 keeps a full-looking purple->green->yellow ramp while keeping
+    white numerals legible on every bead.
+    """
+    return to_hex(cm.viridis(float(np.clip(t, 0.0, 1.0)) * 0.88))
 
 
 def bead(x, y, t, label=None):
     col = cc(t)
     s = f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{BEAD}" fill="{col}"/>'
     if label is not None:
-        s += (f'<text x="{x:.1f}" y="{y+3.2:.1f}" text-anchor="middle" font-size="8" '
-              f'font-weight="bold" fill="white" stroke="#1a202c" stroke-width="2.2" '
-              f'paint-order="stroke" stroke-linejoin="round">{label}</text>')
+        s += (f'<text x="{x:.1f}" y="{y+3.2:.1f}" text-anchor="middle" font-size="8.5" '
+              f'font-weight="bold" fill="#ffffff">{label}</text>')
     return s
 
 
